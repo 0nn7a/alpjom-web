@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth.ts';
 import { useRouter } from 'vue-router';
+import { useToastStore } from '@/stores/toast.ts';
 
 const authStore = useAuthStore();
+const toastStore = useToastStore();
 const router = useRouter();
 
 const logout = async () => {
   await authStore.logout();
+  toastStore.notify('登出成功！', { tone: 'success' });
   await router.push({ name: 'login' });
 };
 </script>

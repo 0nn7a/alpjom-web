@@ -6,8 +6,10 @@ import type { LoginRequest, RegisterRequest } from '@/types/auth';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.ts';
 import { ApiError } from '@/types/common.ts';
+import { useToastStore } from '@/stores/toast';
 
 const authStore = useAuthStore();
+const toastStore = useToastStore();
 
 const router = useRouter();
 const route = useRoute();
@@ -121,6 +123,9 @@ const handleSubmit = async () => {
       await authStore.login(loginRequest);
 
       // 自動導向到被阻擋至登入前那一頁
+      toastStore.notify('登入成功！歡迎來到 alpJom！', {
+        tone: 'success'
+      });
       const redirect = route.query.redirect;
       await router.push(
         typeof redirect === 'string' ? redirect : { name: 'home' }
@@ -132,10 +137,14 @@ const handleSubmit = async () => {
         username: formData.username
       };
       await authStore.register(registerRequest);
+      toastStore.notify('Register success. Please login.', {
+        tone: 'success'
+      });
       await router.push({ name: 'login' });
     }
   } catch (err) {
-    if (err instanceof ApiError) alert(err.message);
+    if (err instanceof ApiError)
+      toastStore.notify(err.message, { tone: 'error' });
   }
 };
 </script>
