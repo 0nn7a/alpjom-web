@@ -1,0 +1,89 @@
+:root {
+  --aj-color-bg: var(--color-white);
+  --aj-color-text: var(--color-neutral-950);
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  display: flex;
+  justify-content: center;
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  color: var(--aj-color-text);
+  line-height: 1.5;
+  font-family: "Bricolage Grotesque", "Noto Sans TC", Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  font-synthesis: none;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+#app {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body,
+#app,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+a,
+label,
+input,
+textarea,
+button {
+  font-family: inherit;
+}
+
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--aj-color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--aj-color-bg) inset;
+}
+
+input[type=password] {
+  letter-spacing: 0.2rem;
+}
+
+input,
+button {
+  outline: none;
+}
+
+label {
+  display: inline-block;
+}
+
+ul,
+ol,
+li {
+  list-style: none;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+}
+
+img {
+  display: block;
+}
+
+/*# sourceMappingURL=main.css.map */
