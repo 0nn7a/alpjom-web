@@ -4,7 +4,8 @@ export const API = {
     BASE: '/auth',
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
-    LOGOUT: '/auth/logout'
+    LOGOUT: '/auth/logout',
+    REFRESH: '/auth/refresh'
   }
 };
 

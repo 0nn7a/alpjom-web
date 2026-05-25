@@ -28,6 +28,12 @@ export interface LoginResponse {
   refreshExpiredAt: number;
 }
 
+// 換發成功後，後端回傳的資料
+export interface RefreshResponse {
+  token: string;
+  expiredAt: number; // 對應後端的 Long
+}
+
 // 修改用戶基本資料
 export interface UpdateProfileRequest {
   username?: string;

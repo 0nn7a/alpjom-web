@@ -3,9 +3,13 @@ import type { LoginRequest, RegisterRequest, User } from '@/types/auth.ts';
 import { ref } from 'vue';
 import { authService } from '@/services/auth.ts';
 import { removeAllTokens, setAllTokens } from '@/utils/jwt.ts';
+import { ApiError } from '@/types/common.ts';
+import { useToastStore } from '@/stores/toast.ts';
+import router from '@/router';
 
 export const useAuthStore = defineStore('auth', () => {
   // States
+  const toastStore = useToastStore();
   const user = ref<User | null>(null);
 
   // Getters
@@ -22,9 +26,20 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logout() {
-    await authService.logout();
-    removeAllTokens();
-    user.value = null;
+    try {
+      await authService.logout();
+      toastStore.notify('登出成功！', { tone: 'success' });
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(
+          `登出時發生問題，但本地資料已清除，原錯誤訊息：${err.message}`,
+          { tone: 'warning' }
+        );
+    } finally {
+      removeAllTokens();
+      user.value = null;
+      await router.push({ name: 'login' });
+    }
   }
 
   return { register, login, logout };
