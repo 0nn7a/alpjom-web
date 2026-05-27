@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # 只有 push 到 main 時才自動部署
+      - gh-pages  # 只有 push 到 gh-pages 時才自動部署
 
 permissions:
   contents: read
@@ -26,7 +26,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22   # 接近本機 24 的新版本，穩定又不用太舊
-          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
