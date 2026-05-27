@@ -28,11 +28,14 @@ const value = defineModel<string>({ default: '' });
   <label
     :for="props.title"
     class="font-normal"
-    :class="[showError && error ? ['text-red-600'] : ['text-neutral-600'], lblClass]"
+    :class="[
+      showError && error ? ['text-red-600'] : ['text-neutral-600'],
+      lblClass
+    ]"
   >
     {{ props.title }}{{ props.required ? '*' : '' }}
   </label>
-  <div class="flex flex-col">
+  <div class="flex flex-col gap-y-0.5">
     <div
       class="flex items-center py-1.5 px-3 font-normal text-neutral-950 border border-neutral-300 rounded-lg transition duration-300 has-focus:ring-2"
       :class="[
@@ -54,7 +57,7 @@ const value = defineModel<string>({ default: '' });
       />
       <slot name="right" />
     </div>
-    <p v-if="showError && error" class="text-lg text-end text-red-400">
+    <p v-if="showError && error" class="text-sm text-end text-red-400">
       {{ error }}
     </p>
   </div>

@@ -123,7 +123,7 @@ const handleSubmit = async () => {
       await authStore.login(loginRequest);
 
       // 自動導向到被阻擋至登入前那一頁
-      toastStore.notify('登入成功！歡迎來到 alpJom！', {
+      toastStore.notify('登入成功！\n歡迎來到 alpJom！', {
         tone: 'success'
       });
       const redirect = route.query.redirect;
@@ -137,7 +137,7 @@ const handleSubmit = async () => {
         username: formData.username
       };
       await authStore.register(registerRequest);
-      toastStore.notify('Register success. Please login.', {
+      toastStore.notify('註冊成功！請嘗試登入！', {
         tone: 'success'
       });
       await router.push({ name: 'login' });
@@ -151,10 +151,10 @@ const handleSubmit = async () => {
 
 <template>
   <section class="my-auto flex flex-col justify-center items-center">
-    <h1 class="font-semibold text-4xl">alpJom</h1>
+    <h1 class="font-semibold text-3xl">alpJom</h1>
     <form
       id="auth-form"
-      class="w-80 flex flex-col gap-x-4 gap-y-0.5 my-10 text-2xl"
+      class="w-60 flex flex-col gap-x-4 gap-y-0.5 my-10"
       @submit.prevent="handleSubmit"
     >
       <FormInput
@@ -164,7 +164,6 @@ const handleSubmit = async () => {
         :error="errors.email"
         :showError="submitAttempted"
         :required="requiredMarks.email"
-        lblClass="text-xl"
       />
 
       <FormInput
@@ -174,13 +173,13 @@ const handleSubmit = async () => {
         :error="errors.password"
         :showError="submitAttempted"
         :required="requiredMarks.password"
-        lblClass="text-xl mt-4"
+        lblClass="mt-3"
       >
         <template #right>
           <Component
             :is="pwdHide ? EyeIcon : EyeSlashIcon"
             @click="pwdHide = !pwdHide"
-            class="h-7 ms-2 text-neutral-400 rounded-md cursor-pointer transition duration-300 hover:text-neutral-700"
+            class="h-5 ms-2 text-neutral-400 rounded-md cursor-pointer transition duration-300 hover:text-neutral-700"
           />
         </template>
       </FormInput>
@@ -192,10 +191,10 @@ const handleSubmit = async () => {
         :error="errors.username"
         :showError="submitAttempted"
         :required="requiredMarks.username"
-        lblClass="text-xl mt-5"
+        lblClass="mt-3"
       >
         <template #left>
-          <p class="text-neutral-400">@</p>
+          <p class="text-neutral-400 -translate-y-px">@</p>
         </template>
       </FormInput>
     </form>
@@ -203,13 +202,13 @@ const handleSubmit = async () => {
     <button
       type="submit"
       form="auth-form"
-      class="text-2xl py-2 px-4 bg-neutral-100 border border-neutral-300 rounded-md cursor-pointer transition duration-300 hover:border-neutral-400"
+      class="text-xl py-2 px-4 bg-neutral-100 border border-neutral-300 rounded-md cursor-pointer transition duration-300 hover:border-neutral-400"
     >
       {{ action }}
     </button>
     <RouterLink
       :to="{ name: direct }"
-      class="mt-4 text-neutral-400 transition duration-300 hover:text-neutral-600"
+      class="mt-3 text-sm text-neutral-400 transition duration-300 hover:text-neutral-600"
     >
       → {{ hint }}
     </RouterLink>

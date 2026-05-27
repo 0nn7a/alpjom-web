@@ -39,11 +39,11 @@ const toneIcons: Record<ToastTone, Component> = {
         <div
           v-for="toast in toasts"
           :key="toast.id"
-          class="flex items-center max-w-full px-4 py-3 gap-x-3 text-start text-xl leading-snug border rounded-md shadow-lg"
+          class="flex items-center max-w-full px-4 py-3 gap-x-2 text-sm text-start leading-snug border rounded-md shadow-lg"
           :class="toneClasses[toast.tone]"
         >
-          <Component :is="toneIcons[toast.tone]" class="shrink-0 h-6" />
-          <p>{{ toast.message }}</p>
+          <Component :is="toneIcons[toast.tone]" class="shrink-0 h-5" />
+          <p class="whitespace-pre-line">{{ toast.message }}</p>
         </div>
       </TransitionGroup>
     </div>
