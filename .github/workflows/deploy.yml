@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22   # 接近本機 24 的新版本，穩定又不用太舊
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
