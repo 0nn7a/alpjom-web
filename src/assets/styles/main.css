@@ -1,6 +1,133 @@
 :root {
+  color-scheme: light;
   --aj-color-bg: var(--color-white);
-  --aj-color-text: var(--color-neutral-950);
+  --aj-color-text: var(--color-neutral-900);
+  --aj-color-muted: color-mix(
+    in srgb,
+    var(--color-neutral-400) 50%,
+    var(--color-neutral-500)
+  );
+  --aj-color-subtle: color-mix(
+    in srgb,
+    var(--color-neutral-300) 50%,
+    var(--color-neutral-400)
+  );
+  --aj-color-surface: var(--color-neutral-100);
+  --aj-color-surface-hover: color-mix(
+    in srgb,
+    var(--aj-color-surface) 50%,
+    var(--color-neutral-200)
+  );
+  --aj-color-border: var(--color-neutral-300);
+  --aj-color-border-active: var(--color-neutral-400);
+  --aj-color-ring: var(--color-neutral-100);
+  --aj-color-placeholder: var(--color-neutral-300);
+  --aj-color-danger: var(--color-red-600);
+  --aj-color-danger-muted: var(--color-red-300);
+  --aj-color-danger-border: var(--color-red-500);
+  --aj-color-danger-ring: var(--color-red-100);
+  --aj-tone-info-bg: var(--color-neutral-50);
+  --aj-tone-info-text: var(--color-neutral-900);
+  --aj-tone-info-border: var(--color-neutral-300);
+  --aj-tone-info-shadow: color-mix(
+    in srgb,
+    var(--color-neutral-200) 80%,
+    transparent
+  );
+  --aj-tone-success-bg: var(--color-emerald-50);
+  --aj-tone-success-text: var(--color-emerald-900);
+  --aj-tone-success-border: var(--color-emerald-300);
+  --aj-tone-success-shadow: color-mix(
+    in srgb,
+    var(--color-emerald-100) 80%,
+    transparent
+  );
+  --aj-tone-warning-bg: var(--color-amber-50);
+  --aj-tone-warning-text: var(--color-amber-900);
+  --aj-tone-warning-border: var(--color-amber-300);
+  --aj-tone-warning-shadow: color-mix(
+    in srgb,
+    var(--color-amber-100) 80%,
+    transparent
+  );
+  --aj-tone-error-bg: var(--color-red-50);
+  --aj-tone-error-text: var(--color-red-900);
+  --aj-tone-error-border: var(--color-red-300);
+  --aj-tone-error-shadow: color-mix(
+    in srgb,
+    var(--color-red-100) 80%,
+    transparent
+  );
+}
+
+html[data-theme=dark] {
+  color-scheme: dark;
+  --aj-color-bg: var(--color-neutral-900);
+  --aj-color-text: var(--color-neutral-200);
+  --aj-color-muted: color-mix(
+    in srgb,
+    var(--color-neutral-400) 50%,
+    var(--color-neutral-500)
+  );
+  --aj-color-subtle: var(--color-neutral-600);
+  --aj-color-surface: var(--color-neutral-800);
+  --aj-color-surface-hover: color-mix(
+    in srgb,
+    var(--aj-color-surface) 50%,
+    var(--color-neutral-700)
+  );
+  --aj-color-border: var(--color-neutral-600);
+  --aj-color-border-active: var(--color-neutral-500);
+  --aj-color-ring: var(--color-neutral-800);
+  --aj-color-placeholder: var(--color-neutral-700);
+  --aj-color-danger: var(--color-red-700);
+  --aj-color-danger-muted: var(--color-red-900);
+  --aj-color-danger-border: var(--color-red-800);
+  --aj-color-danger-ring: var(--color-red-950);
+  --aj-tone-info-bg: var(--color-neutral-900);
+  --aj-tone-info-text: var(--color-neutral-300);
+  --aj-tone-info-border: var(--color-neutral-700);
+  --aj-tone-info-shadow: color-mix(
+    in srgb,
+    var(--color-neutral-950) 70%,
+    transparent
+  );
+  --aj-tone-success-bg: color-mix(
+    in srgb,
+    var(--color-emerald-950) 70%,
+    var(--color-neutral-900)
+  );
+  --aj-tone-success-text: var(--color-emerald-200);
+  --aj-tone-success-border: var(--color-emerald-700);
+  --aj-tone-success-shadow: color-mix(
+    in srgb,
+    var(--color-emerald-950) 60%,
+    transparent
+  );
+  --aj-tone-warning-bg: color-mix(
+    in srgb,
+    var(--color-amber-950) 40%,
+    var(--color-neutral-900)
+  );
+  --aj-tone-warning-text: var(--color-orange-200);
+  --aj-tone-warning-border: var(--color-amber-600);
+  --aj-tone-warning-shadow: color-mix(
+    in srgb,
+    var(--color-amber-950) 60%,
+    transparent
+  );
+  --aj-tone-error-bg: color-mix(
+    in srgb,
+    var(--color-red-950) 70%,
+    var(--color-neutral-900)
+  );
+  --aj-tone-error-text: var(--color-red-200);
+  --aj-tone-error-border: var(--color-red-700);
+  --aj-tone-error-shadow: color-mix(
+    in srgb,
+    var(--color-red-950) 60%,
+    transparent
+  );
 }
 
 ::-webkit-scrollbar {

@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <h1>Profile</h1>
+  <h1 class="m-auto">Profile</h1>
 </template>
 
 <style scoped></style>

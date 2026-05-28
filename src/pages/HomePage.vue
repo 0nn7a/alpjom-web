@@ -9,17 +9,25 @@ const logout = async () => {
 </script>
 
 <template>
-  <section class="my-auto flex flex-col justify-center items-center gap-y-1">
+  <section class="m-auto flex flex-col justify-center items-center gap-y-1">
     <p class="text-2xl">Welcome to alpJom!</p>
+
     <RouterLink
       :to="{ name: 'profile' }"
-      class="text-sm text-neutral-400 transition duration-300 hover:text-neutral-600"
+      class="text-sm text-(--aj-color-subtle) transition duration-300 hover:text-(--aj-color-muted)"
     >
       → Go to profile
     </RouterLink>
+    <RouterLink
+      :to="{ name: 'color' }"
+      class="text-sm text-(--aj-color-subtle) transition duration-300 hover:text-(--aj-color-muted)"
+    >
+      → Go to color
+    </RouterLink>
+
     <button
       type="button"
-      class="mt-6 text-xl py-2 px-4 bg-neutral-100 border border-neutral-300 rounded-md cursor-pointer transition duration-300 hover:border-neutral-400"
+      class="mt-6 py-1 px-3 bg-(--aj-color-surface) border border-(--aj-color-border) rounded-md cursor-pointer transition duration-300 hover:border-(--aj-color-border-active)"
       @click="logout"
     >
       Logout

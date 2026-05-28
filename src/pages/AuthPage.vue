@@ -179,7 +179,7 @@ const handleSubmit = async () => {
           <Component
             :is="pwdHide ? EyeIcon : EyeSlashIcon"
             @click="pwdHide = !pwdHide"
-            class="h-5 ms-2 text-neutral-400 rounded-md cursor-pointer transition duration-300 hover:text-neutral-700"
+            class="h-5 ms-2 text-(--aj-color-border) rounded-md cursor-pointer transition duration-300 hover:text-(--aj-color-border-active)"
           />
         </template>
       </FormInput>
@@ -194,7 +194,7 @@ const handleSubmit = async () => {
         lblClass="mt-3"
       >
         <template #left>
-          <p class="text-neutral-400 -translate-y-px">@</p>
+          <p class="text-(--aj-color-border) -translate-y-px">@</p>
         </template>
       </FormInput>
     </form>
@@ -202,13 +202,13 @@ const handleSubmit = async () => {
     <button
       type="submit"
       form="auth-form"
-      class="text-xl py-2 px-4 bg-neutral-100 border border-neutral-300 rounded-md cursor-pointer transition duration-300 hover:border-neutral-400"
+      class="py-1 px-3 bg-(--aj-color-surface) border border-(--aj-color-border) rounded-md cursor-pointer transition duration-300 hover:border-(--aj-color-border-active)"
     >
       {{ action }}
     </button>
     <RouterLink
       :to="{ name: direct }"
-      class="mt-3 text-sm text-neutral-400 transition duration-300 hover:text-neutral-600"
+      class="mt-3 text-sm text-(--aj-color-subtle) transition duration-300 hover:text-(--aj-color-muted)"
     >
       → {{ hint }}
     </RouterLink>

@@ -13,11 +13,10 @@ const toastStore = useToastStore();
 const { toasts } = storeToRefs(toastStore);
 
 const toneClasses: Record<ToastTone, string> = {
-  info: 'border-neutral-300 bg-neutral-50 text-neutral-900 shadow-neutral-200/80',
-  success:
-    'border-emerald-300 bg-emerald-50 text-emerald-900 shadow-emerald-100/80',
-  warning: 'border-amber-300 bg-amber-50 text-amber-900 shadow-amber-100/80',
-  error: 'border-red-300 bg-red-50 text-red-900 shadow-red-100/80'
+  info: 'toast-info',
+  success: 'toast-success',
+  warning: 'toast-warning',
+  error: 'toast-error'
 };
 const toneIcons: Record<ToastTone, Component> = {
   info: InformationCircleIcon,
@@ -39,7 +38,7 @@ const toneIcons: Record<ToastTone, Component> = {
         <div
           v-for="toast in toasts"
           :key="toast.id"
-          class="flex items-center max-w-full px-4 py-3 gap-x-2 text-sm text-start leading-snug border rounded-md shadow-lg"
+          class="toast-item flex items-center max-w-full px-4 py-3 gap-x-2 text-sm text-start leading-snug border rounded-md"
           :class="toneClasses[toast.tone]"
         >
           <Component :is="toneIcons[toast.tone]" class="shrink-0 h-5" />
@@ -51,6 +50,41 @@ const toneIcons: Record<ToastTone, Component> = {
 </template>
 
 <style scoped>
+.toast-item {
+  border-color: var(--toast-border);
+  background-color: var(--toast-bg);
+  color: var(--toast-text);
+  box-shadow: 0 10px 15px -3px var(--toast-shadow);
+}
+
+.toast-info {
+  --toast-bg: var(--aj-tone-info-bg);
+  --toast-text: var(--aj-tone-info-text);
+  --toast-border: var(--aj-tone-info-border);
+  --toast-shadow: var(--aj-tone-info-shadow);
+}
+
+.toast-success {
+  --toast-bg: var(--aj-tone-success-bg);
+  --toast-text: var(--aj-tone-success-text);
+  --toast-border: var(--aj-tone-success-border);
+  --toast-shadow: var(--aj-tone-success-shadow);
+}
+
+.toast-warning {
+  --toast-bg: var(--aj-tone-warning-bg);
+  --toast-text: var(--aj-tone-warning-text);
+  --toast-border: var(--aj-tone-warning-border);
+  --toast-shadow: var(--aj-tone-warning-shadow);
+}
+
+.toast-error {
+  --toast-bg: var(--aj-tone-error-bg);
+  --toast-text: var(--aj-tone-error-text);
+  --toast-border: var(--aj-tone-error-border);
+  --toast-shadow: var(--aj-tone-error-shadow);
+}
+
 .toast-enter-active,
 .toast-leave-active {
   transition:

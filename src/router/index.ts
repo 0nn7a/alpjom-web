@@ -12,21 +12,28 @@ const routes: RouteRecordRaw[] = [
         name: 'home',
         component: () => import('@/pages/HomePage.vue'),
         meta: { auth: true }
-      }
-    ]
-  },
-  {
-    path: '/profile',
-    component: () => import('@/layouts/ProfileLayout.vue'),
-    children: [
+      },
       {
-        path: '',
-        name: 'profile',
-        component: () => import('@/pages/ProfilePage.vue'),
-        meta: { auth: true }
+        path: 'color',
+        name: 'color',
+        component: () => import('@/pages/ColorPage.vue'),
+        meta: { auth: false }
+      },
+      {
+        path: 'profile',
+        component: () => import('@/layouts/ProfileLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'profile',
+            component: () => import('@/pages/ProfilePage.vue'),
+            meta: { auth: true }
+          }
+        ]
       }
     ]
   },
+
   {
     path: '/login',
     name: 'login',

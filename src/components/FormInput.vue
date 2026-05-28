@@ -29,7 +29,9 @@ const value = defineModel<string>({ default: '' });
     :for="props.title"
     class="font-normal"
     :class="[
-      showError && error ? ['text-red-600'] : ['text-neutral-600'],
+      showError && error
+        ? ['text-(--aj-color-danger)']
+        : ['text-(--aj-color-muted)'],
       lblClass
     ]"
   >
@@ -37,11 +39,14 @@ const value = defineModel<string>({ default: '' });
   </label>
   <div class="flex flex-col gap-y-0.5">
     <div
-      class="flex items-center py-1.5 px-3 font-normal text-neutral-950 border border-neutral-300 rounded-lg transition duration-300 has-focus:ring-2"
+      class="flex items-center py-1.5 px-3 font-normal text-(--aj-color-text) border border-(--aj-color-border) rounded-lg transition duration-300 has-focus:ring-2"
       :class="[
         showError && error
-          ? ['border-red-500', 'ring-red-100']
-          : ['has-focus:border-neutral-400', 'ring-neutral-100'],
+          ? ['border-(--aj-color-danger)', 'ring-(--aj-color-danger-ring)']
+          : [
+              'has-focus:border-(--aj-color-border-active)',
+              'ring-(--aj-color-ring)'
+            ],
         iptClass
       ]"
     >
@@ -53,11 +58,14 @@ const value = defineModel<string>({ default: '' });
         :placeholder="props.placeholder"
         autocomplete="off"
         v-model.trim="value"
-        class="flex-1 min-w-0 placeholder:text-neutral-300"
+        class="flex-1 min-w-0 placeholder:text-(--aj-color-placeholder)"
       />
       <slot name="right" />
     </div>
-    <p v-if="showError && error" class="text-sm text-end text-red-400">
+    <p
+      v-if="showError && error"
+      class="text-sm text-end text-(--aj-color-danger-muted)"
+    >
       {{ error }}
     </p>
   </div>
