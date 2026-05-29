@@ -1,13 +1,8 @@
-import {
-  getRefreshToken,
-  getToken,
-  removeAllTokens,
-  setToken
-} from '@/utils/jwt';
+import { getRefreshToken, getToken } from '@/utils/jwt';
 import { ApiError, type ApiResponse } from '@/types/common';
-import type { RefreshResponse } from '@/types/auth.ts';
-import router from '@/router';
 import { API } from '@/utils/constant.ts';
+import router from '@/router';
+import { clearSession, refreshAccessToken } from '@/services/session';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -65,10 +60,8 @@ const SKIP_REFRESH_PATHS = [
   API.AUTH.LOGIN,
   API.AUTH.REGISTER,
   API.AUTH.LOGOUT,
-  API.AUTH.REGISTER
+  API.AUTH.REFRESH
 ];
-let isRefreshing = false;
-let pendingRequests: (() => void)[] = [];
 
 async function requestWithRetry<T>(
   path: string,
@@ -85,49 +78,14 @@ async function requestWithRetry<T>(
       throw err;
     }
 
-    // 如果令牌正在換發中，將當前請求排隊等待
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        pendingRequests.push(async () => {
-          try {
-            resolve(await request<T>(path, options));
-          } catch (e) {
-            reject(e);
-          }
-        });
-      });
-    }
-
-    // 換發令牌
-    isRefreshing = true;
     try {
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) {
-        throw new ApiError({ code: 401, message: '請重新登入！', data: null });
-      }
-
-      const res = await request<RefreshResponse>('/auth/refresh', {
-        method: 'POST',
-        headers: { 'X-Refresh-Token': refreshToken }
-      });
-
-      // 換發成功，更新 token
-      setToken(res.data.token, res.data.expiredAt);
-
-      // 重新開始執行排隊等待中的請求
-      pendingRequests.forEach((cb) => cb());
-      pendingRequests = [];
-
-      // 重試原本的請求
+      await refreshAccessToken();
       return await request<T>(path, options);
     } catch (e) {
-      // 換發失敗，清除 Token 並導向登入頁
-      pendingRequests = [];
-      removeAllTokens();
+      // 請求失敗引起的自動換發失敗，清除 Token 並導向登入頁
+      clearSession();
       await router.push({ name: 'login' });
       throw e;
-    } finally {
-      isRefreshing = false;
     }
   }
 }

@@ -1,6 +1,9 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 import { getToken } from '@/utils/jwt.ts';
+import { clearSession, refreshAccessToken } from '@/services/session';
+import { useToastStore } from '@/stores/toast.ts';
+import { ApiError } from '@/types/common.ts';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -57,13 +60,38 @@ const router = createRouter({
 });
 
 // 全域守衛：驗證登入狀態
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const requiresAuth = to.matched.some((route) => route.meta.auth);
   const isAuthPage = to.name === 'login' || to.name === 'register';
   const token = getToken();
+  const toastStore = useToastStore();
 
-  if (isAuthPage && token) return { name: 'home' };
-  if (!requiresAuth || token) return true;
+  if (isAuthPage) {
+    if (token) return { name: 'home' };
+
+    try {
+      await refreshAccessToken();
+      return { name: 'home' };
+    } catch {
+      // 切換路由引起的自動換發失敗，清除 Token 並允許前往登入註冊頁
+      clearSession();
+    }
+
+    return true;
+  }
+
+  if (!requiresAuth) return true;
+  if (token) return true;
+
+  try {
+    await refreshAccessToken();
+    return true;
+  } catch (err) {
+    // 切換路由引起的自動換發失敗，清除 Token 並導向至重新登入
+    clearSession();
+    if (err instanceof ApiError)
+      toastStore.notify(err.message, { tone: 'error' });
+  }
 
   return {
     name: 'login',
