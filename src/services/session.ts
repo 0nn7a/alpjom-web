@@ -9,7 +9,6 @@ let refreshPromise: Promise<void> | null = null;
 
 async function refreshTokenRequest(): Promise<void> {
   const refreshToken = getRefreshToken();
-  console.log(111);
 
   if (!refreshToken) {
     throw new ApiError({ code: 401, message: '請重新登入！', data: null });
