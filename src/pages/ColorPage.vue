@@ -1,9 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div
-    class="w-full flex flex-col justify-center items-center gap-y-1 bg-(--aj-color-bg)"
-  >
+  <div class="w-full flex flex-col justify-center items-center gap-y-1">
     <p class="text-(--aj-color-text)">text</p>
     <p class="text-(--aj-color-muted)">muted</p>
     <p class="text-(--aj-color-surface)">surface</p>

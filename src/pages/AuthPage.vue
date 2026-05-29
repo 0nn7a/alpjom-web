@@ -83,7 +83,7 @@ const resolveRequired = (rule: FieldRule) => {
 const validateField = (value: string, rule: FieldRule) => {
   const isRequired = resolveRequired(rule);
 
-  if (!value) return isRequired ? 'Required field.' : '';
+  if (!value) return isRequired ? '*必填欄位' : '';
   if (rule.pattern && !rule.pattern.regex.test(value))
     return rule.pattern.message;
   return '';

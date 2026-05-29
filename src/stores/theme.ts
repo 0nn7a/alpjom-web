@@ -1,10 +1,15 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-export type ThemePreference = 'light' | 'dark' | 'system';
+export const THEME_PREFERENCES = ['light', 'dark', 'system'] as const;
+export type ThemePreference = (typeof THEME_PREFERENCES)[number];
 export type ResolvedTheme = 'light' | 'dark';
 
 const STORAGE_KEY = 'alpJom-theme';
+
+function isThemePreference(value: string | null): value is ThemePreference {
+  return value !== null && THEME_PREFERENCES.includes(value as ThemePreference);
+}
 
 export const useThemeStore = defineStore('theme', () => {
   const preference = ref<ThemePreference>('system');
@@ -35,11 +40,9 @@ export const useThemeStore = defineStore('theme', () => {
   }
 
   function initTheme() {
-    const savedTheme = localStorage.getItem(
-      STORAGE_KEY
-    ) as ThemePreference | null;
+    const savedTheme = localStorage.getItem(STORAGE_KEY);
 
-    preference.value = savedTheme ?? 'system';
+    preference.value = isThemePreference(savedTheme) ? savedTheme : 'system';
     systemTheme.value = readSystemTheme();
     applyTheme();
 
