@@ -1,48 +1,193 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { BackspaceIcon } from '@heroicons/vue/24/outline';
+
+type KeyboardButton = {
+  key: string;
+  label?: string;
+  extraClass?: string;
+  labelClass?: string;
+  icon?: 'backspace';
+};
+
+type KeyboardRow = {
+  id: string;
+  offsetClass?: string;
+  buttons: KeyboardButton[];
+};
+
+const keyboardRows: KeyboardRow[] = [
+  {
+    id: 'top-row',
+    offsetClass: 'translate-x-3',
+    buttons: [
+      { key: 'Q' },
+      { key: 'W' },
+      { key: 'E' },
+      { key: 'R' },
+      { key: 'T' },
+      { key: 'Y' },
+      { key: 'U' },
+      { key: 'I' },
+      { key: 'O' },
+      { key: 'P' }
+    ]
+  },
+  {
+    id: 'middle-row',
+    buttons: [
+      { key: 'A' },
+      { key: 'S' },
+      { key: 'D' },
+      { key: 'F' },
+      { key: 'G' },
+      { key: 'H' },
+      { key: 'J' },
+      { key: 'K' },
+      { key: 'L' },
+      {
+        key: 'Enter',
+        extraClass: 'plus',
+        label: '↵',
+        labelClass: 'translate-y-0.5'
+      }
+    ]
+  },
+  {
+    id: 'bottom-row',
+    offsetClass: 'translate-x-6',
+    buttons: [
+      { key: 'Z' },
+      { key: 'X' },
+      { key: 'C' },
+      { key: 'V' },
+      { key: 'B' },
+      { key: 'N' },
+      { key: 'M' },
+      { key: 'Backspace', extraClass: 'plus', icon: 'backspace' }
+    ]
+  }
+];
+
+const supportedKeys = new Set(
+  keyboardRows.flatMap((row) => row.buttons.map((button) => button.key))
+);
+
+const pressedKey = ref<string | null>(null);
+const emit = defineEmits<{
+  (event: 'press', key: string): void;
+}>();
+
+const normalizeKey = (key: string) => {
+  if (key.length === 1) {
+    return key.toUpperCase();
+  }
+
+  return key;
+};
+
+const isSupportedKey = (key: string) => supportedKeys.has(key);
+
+const handlePointerDown = (event: PointerEvent) => {
+  const target = event.currentTarget as HTMLButtonElement | null;
+  const key = target?.dataset.key;
+
+  if (!key || !target) {
+    return;
+  }
+
+  pressedKey.value = key;
+  target.setPointerCapture(event.pointerId);
+};
+
+const handlePointerUp = (event: PointerEvent) => {
+  const target = event.currentTarget as HTMLButtonElement | null;
+  const key = target?.dataset.key;
+
+  if (!key) {
+    return;
+  }
+
+  emit('press', key);
+  pressedKey.value = null;
+};
+
+const clearPressedKey = () => {
+  pressedKey.value = null;
+};
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  const key = normalizeKey(event.key);
+
+  if (!isSupportedKey(key) || event.repeat) {
+    return;
+  }
+
+  if (event.metaKey || event.ctrlKey || event.altKey) {
+    return;
+  }
+
+  event.preventDefault();
+  pressedKey.value = key;
+  emit('press', key);
+};
+
+const handleKeyUp = (event: KeyboardEvent) => {
+  const key = normalizeKey(event.key);
+
+  if (pressedKey.value === key) {
+    pressedKey.value = null;
+  }
+};
+
+const clearPressedKeyOnFocusLoss = () => {
+  pressedKey.value = null;
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('keyup', handleKeyUp);
+  window.addEventListener('blur', clearPressedKeyOnFocusLoss);
+  document.addEventListener('visibilitychange', clearPressedKeyOnFocusLoss);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+  window.removeEventListener('keyup', handleKeyUp);
+  window.removeEventListener('blur', clearPressedKeyOnFocusLoss);
+  document.removeEventListener('visibilitychange', clearPressedKeyOnFocusLoss);
+});
 </script>
 
 <template>
   <div
     class="keyboard grow flex flex-col items-center gap-0.5 scale-125 origin-bottom select-none"
   >
-    <div class="keyboard-row translate-x-1.5">
-      <button type="button"><span>Q</span></button>
-      <button type="button"><span>W</span></button>
-      <button type="button"><span>E</span></button>
-      <button type="button"><span>R</span></button>
-      <button type="button"><span>T</span></button>
-      <button type="button"><span>Y</span></button>
-      <button type="button"><span>U</span></button>
-      <button type="button"><span>I</span></button>
-      <button type="button"><span>O</span></button>
-      <button type="button"><span>P</span></button>
-    </div>
-    <div class="keyboard-row">
-      <button type="button"><span>A</span></button>
-      <button type="button"><span>S</span></button>
-      <button type="button"><span>D</span></button>
-      <button type="button"><span>F</span></button>
-      <button type="button"><span>G</span></button>
-      <button type="button"><span>H</span></button>
-      <button type="button"><span>J</span></button>
-      <button type="button"><span>K</span></button>
-      <button type="button"><span>L</span></button>
-      <button type="button" class="plus">
-        <span class="translate-y-0.5">↵</span>
-      </button>
-    </div>
-    <div class="keyboard-row translate-x-5.5">
-      <button type="button"><span>Z</span></button>
-      <button type="button"><span>X</span></button>
-      <button type="button"><span>C</span></button>
-      <button type="button"><span>V</span></button>
-      <button type="button"><span>B</span></button>
-      <button type="button"><span>N</span></button>
-      <button type="button"><span>M</span></button>
-      <button type="button" class="plus">
-        <span>
-          <BackspaceIcon class="h-3 w-3" />
+    <div
+      v-for="row in keyboardRows"
+      :key="row.id"
+      :class="['keyboard-row', row.offsetClass]"
+    >
+      <button
+        v-for="button in row.buttons"
+        :key="button.key"
+        type="button"
+        :data-key="button.key"
+        :class="[
+          button.extraClass,
+          { 'is-pressed': pressedKey === button.key }
+        ]"
+        @pointerdown="handlePointerDown"
+        @pointerup="handlePointerUp"
+        @pointercancel="clearPressedKey"
+        @blur="clearPressedKey"
+      >
+        <span :class="button.labelClass">
+          <BackspaceIcon
+            v-if="button.icon === 'backspace'"
+            class="h-2.5 w-2.5"
+          />
+          <template v-else>{{ button.label ?? button.key }}</template>
         </span>
       </button>
     </div>
@@ -89,12 +234,13 @@ button {
 
 @media (hover: hover) and (pointer: fine) {
   button:hover {
-    @apply text-(--aj-colot-text) border-(--keycap-border-active) translate-y-[-2%];
+    @apply text-(--aj-colot-text) border-(--keycap-border-active) translate-y-[-1%];
   }
 }
 
-button:active {
-  @apply translate-y-0;
+button:active,
+button.is-pressed {
+  @apply translate-y-[2%];
   box-shadow:
     inset 0 1px 1px 1px var(--keycap-bottom),
     inset 0 -1px 3px 0 var(--keycap-highlight),

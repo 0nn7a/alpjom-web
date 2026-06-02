@@ -3,8 +3,10 @@ import { useRoute } from 'vue-router';
 import { computed, onMounted } from 'vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import KeyBoard from '@/components/KeyBoard.vue';
+import { useToastStore } from '@/stores/toast.ts';
 
 const route = useRoute();
+const toastStore = useToastStore();
 const mode = computed(() => route.params.mode);
 
 const guesses = [
@@ -25,6 +27,10 @@ const toneClasses: Record<string, string> = {
   G: 'wordle-g',
   Y: 'wordle-y',
   W: 'wordle-w'
+};
+
+const handleKeyPress = (key: string) => {
+  toastStore.notify(`當前點擊：${key}`, { duration: 1000 });
 };
 
 onMounted(async () => {
@@ -61,7 +67,7 @@ onMounted(async () => {
     </section>
 
     <template #footer>
-      <KeyBoard />
+      <KeyBoard @press="handleKeyPress" />
     </template>
   </DefaultLayout>
 </template>
