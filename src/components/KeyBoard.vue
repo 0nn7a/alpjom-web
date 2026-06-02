@@ -86,9 +86,13 @@ button {
     0 0.05rem 0.05rem 0 var(--keycap-shadow);
   -webkit-tap-highlight-color: transparent; /* 關掉預設的藍/灰色高亮 */
 }
-button:hover {
-  @apply text-(--aj-colot-text) border-(--keycap-border-active) translate-y-[-2%];
+
+@media (hover: hover) and (pointer: fine) {
+  button:hover {
+    @apply text-(--aj-colot-text) border-(--keycap-border-active) translate-y-[-2%];
+  }
 }
+
 button:active {
   @apply translate-y-0;
   box-shadow:
