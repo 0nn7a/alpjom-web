@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component } from 'vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { BackspaceIcon } from '@heroicons/vue/24/outline';
 
@@ -7,7 +8,7 @@ type KeyboardButton = {
   label?: string;
   extraClass?: string;
   labelClass?: string;
-  icon?: 'backspace';
+  icon?: Component;
 };
 
 type KeyboardRow = {
@@ -64,98 +65,87 @@ const keyboardRows: KeyboardRow[] = [
       { key: 'B' },
       { key: 'N' },
       { key: 'M' },
-      { key: 'Backspace', extraClass: 'plus', icon: 'backspace' }
+      { key: 'Backspace', extraClass: 'plus', icon: BackspaceIcon }
     ]
   }
 ];
 
-const supportedKeys = new Set(
-  keyboardRows.flatMap((row) => row.buttons.map((button) => button.key))
-);
-
-const pressedKey = ref<string | null>(null);
 const emit = defineEmits<{
   (event: 'press', key: string): void;
 }>();
 
-const normalizeKey = (key: string) => {
-  if (key.length === 1) {
-    return key.toUpperCase();
-  }
+const pressedKey = ref<string | null>(null);
+const clearPressedKey = () => {
+  pressedKey.value = null;
+};
 
+// 判斷是否為支援按鍵
+const supportedKeys = new Set(
+  keyboardRows.flatMap((row) => row.buttons.map((button) => button.key))
+);
+const isSupportedKey = (key: string) => supportedKeys.has(key);
+
+// 避免鍵盤輸入字母時受大小寫、輸入法影響，統一轉為大寫
+const normalizeKey = (key: string) => {
+  if (key.length === 1) return key.toUpperCase();
   return key;
 };
 
-const isSupportedKey = (key: string) => supportedKeys.has(key);
-
+// 虛擬鍵盤點擊
 const handlePointerDown = (event: PointerEvent) => {
   const target = event.currentTarget as HTMLButtonElement | null;
   const key = target?.dataset.key;
-
-  if (!key || !target) {
-    return;
-  }
+  if (!key || !target) return;
 
   pressedKey.value = key;
   target.setPointerCapture(event.pointerId);
 };
 
+// 虛擬鍵盤鬆開
 const handlePointerUp = (event: PointerEvent) => {
   const target = event.currentTarget as HTMLButtonElement | null;
   const key = target?.dataset.key;
-
-  if (!key) {
-    return;
-  }
+  if (!key) return;
 
   emit('press', key);
-  pressedKey.value = null;
+  clearPressedKey();
 };
 
-const clearPressedKey = () => {
-  pressedKey.value = null;
-};
-
+// 實體鍵盤按下
 const handleKeyDown = (event: KeyboardEvent) => {
   const key = normalizeKey(event.key);
 
-  if (!isSupportedKey(key) || event.repeat) {
-    return;
-  }
+  // 排除虛擬鍵盤以外的鍵 + 長按時避免連發
+  if (!isSupportedKey(key) || event.repeat) return;
 
-  if (event.metaKey || event.ctrlKey || event.altKey) {
-    return;
-  }
+  // 避免阻擋到重要快捷鍵
+  if (event.metaKey || event.ctrlKey || event.altKey) return;
 
   event.preventDefault();
   pressedKey.value = key;
   emit('press', key);
 };
 
+// 實體鍵盤鬆開
 const handleKeyUp = (event: KeyboardEvent) => {
   const key = normalizeKey(event.key);
-
-  if (pressedKey.value === key) {
-    pressedKey.value = null;
-  }
-};
-
-const clearPressedKeyOnFocusLoss = () => {
-  pressedKey.value = null;
+  if (pressedKey.value === key) clearPressedKey();
 };
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
-  window.addEventListener('blur', clearPressedKeyOnFocusLoss);
-  document.addEventListener('visibilitychange', clearPressedKeyOnFocusLoss);
+
+  // 視窗失焦或切頁時用來清空按下狀態，避免使用者切走視窗後 UI 卡住
+  window.addEventListener('blur', clearPressedKey);
+  document.addEventListener('visibilitychange', clearPressedKey);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeyDown);
   window.removeEventListener('keyup', handleKeyUp);
-  window.removeEventListener('blur', clearPressedKeyOnFocusLoss);
-  document.removeEventListener('visibilitychange', clearPressedKeyOnFocusLoss);
+  window.removeEventListener('blur', clearPressedKey);
+  document.removeEventListener('visibilitychange', clearPressedKey);
 });
 </script>
 
@@ -183,10 +173,7 @@ onBeforeUnmount(() => {
         @blur="clearPressedKey"
       >
         <span :class="button.labelClass">
-          <BackspaceIcon
-            v-if="button.icon === 'backspace'"
-            class="h-2.5 w-2.5"
-          />
+          <component :is="button.icon" v-if="button.icon" class="h-2.5 w-2.5" />
           <template v-else>{{ button.label ?? button.key }}</template>
         </span>
       </button>
@@ -234,7 +221,7 @@ button {
 
 @media (hover: hover) and (pointer: fine) {
   button:hover {
-    @apply text-(--aj-colot-text) border-(--keycap-border-active) translate-y-[-1%];
+    @apply text-(--aj-color-text) border-(--keycap-border-active) translate-y-[-1%];
   }
 }
 
