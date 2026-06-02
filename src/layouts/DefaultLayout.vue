@@ -3,15 +3,23 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
 </script>
 
 <template>
-  <main class="w-full flex flex-col items-center pt-4 bg-(--aj-color-bg)">
-    <nav class="flex mt-2">
-      <ThemeToggle />
-    </nav>
+  <section class="h-full w-full flex flex-col items-center py-4 gap-y-4">
+    <header class="shrink-0 w-full flex">
+      <slot name="header-left" />
+      <div class="mx-auto">
+        <ThemeToggle />
+      </div>
+      <slot name="header-right" />
+    </header>
 
     <div class="grow w-full flex">
-      <RouterView />
+      <slot />
     </div>
-  </main>
+
+    <footer class="shrink-0 w-full flex">
+      <slot name="footer" />
+    </footer>
+  </section>
 </template>
 
 <style scoped></style>

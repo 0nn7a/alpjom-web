@@ -6,6 +6,11 @@ export const API = {
     REGISTER: '/auth/register',
     LOGOUT: '/auth/logout',
     REFRESH: '/auth/refresh'
+  },
+  WORDLE: {
+    START: '/wordle/start',
+    GUESS: '/wordle/guess',
+    GAME: '/wordle/game'
   }
 };
 

@@ -8,7 +8,7 @@ import { ApiError } from '@/types/common.ts';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('@/layouts/DefaultLayout.vue'),
+    component: () => import('@/layouts/EmptyLayout.vue'),
     children: [
       {
         path: '',
@@ -24,7 +24,6 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'profile',
-        component: () => import('@/layouts/ProfileLayout.vue'),
         children: [
           {
             path: '',
@@ -33,10 +32,20 @@ const routes: RouteRecordRaw[] = [
             meta: { auth: true }
           }
         ]
+      },
+      {
+        path: 'wordle',
+        children: [
+          {
+            path: ':mode(daily|practice)',
+            name: 'wordle-game',
+            component: () => import('@/pages/WordleGame.vue'),
+            meta: { auth: true }
+          }
+        ]
       }
     ]
   },
-
   {
     path: '/login',
     name: 'login',

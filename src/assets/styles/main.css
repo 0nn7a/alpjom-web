@@ -35,7 +35,7 @@
     transparent
   );
   --aj-tone-success-bg: var(--color-emerald-50);
-  --aj-tone-success-text: var(--color-emerald-900);
+  --aj-tone-success-text: var(--color-emerald-700);
   --aj-tone-success-border: var(--color-emerald-300);
   --aj-tone-success-shadow: color-mix(
     in srgb,
@@ -43,7 +43,7 @@
     transparent
   );
   --aj-tone-warning-bg: var(--color-amber-50);
-  --aj-tone-warning-text: var(--color-amber-900);
+  --aj-tone-warning-text: var(--color-amber-600);
   --aj-tone-warning-border: var(--color-amber-300);
   --aj-tone-warning-shadow: color-mix(
     in srgb,
@@ -51,7 +51,7 @@
     transparent
   );
   --aj-tone-error-bg: var(--color-red-50);
-  --aj-tone-error-text: var(--color-red-900);
+  --aj-tone-error-text: var(--color-red-600);
   --aj-tone-error-border: var(--color-red-300);
   --aj-tone-error-shadow: color-mix(
     in srgb,
