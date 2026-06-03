@@ -2,6 +2,7 @@
 import type { Component } from 'vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { BackspaceIcon } from '@heroicons/vue/24/outline';
+import keyboardTapSoundUrl from '@/assets/sounds/keyboard-tap.mp3';
 
 type KeyboardButton = {
   key: string;
@@ -75,6 +76,7 @@ const emit = defineEmits<{
 }>();
 
 const pressedKey = ref<string | null>(null);
+
 const clearPressedKey = () => {
   pressedKey.value = null;
 };
@@ -91,6 +93,17 @@ const normalizeKey = (key: string) => {
   return key;
 };
 
+// 播放敲擊鍵盤音效
+const playPressSound = () => {
+  if (typeof window === 'undefined') return;
+
+  const audio = new Audio(keyboardTapSoundUrl);
+  audio.volume = 0.3;
+  void audio.play().catch(() => {
+    // 瀏覽器若擋掉播放，就安靜失敗，不影響按鍵本身。
+  });
+};
+
 // 虛擬鍵盤點擊
 const handlePointerDown = (event: PointerEvent) => {
   const target = event.currentTarget as HTMLButtonElement | null;
@@ -98,6 +111,7 @@ const handlePointerDown = (event: PointerEvent) => {
   if (!key || !target) return;
 
   pressedKey.value = key;
+  void playPressSound();
   target.setPointerCapture(event.pointerId);
 };
 
@@ -123,6 +137,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
   event.preventDefault();
   pressedKey.value = key;
+  void playPressSound();
   emit('press', key);
 };
 
@@ -159,22 +174,19 @@ onBeforeUnmount(() => {
       :class="['keyboard-row', row.offsetClass]"
     >
       <button
-        v-for="button in row.buttons"
-        :key="button.key"
+        v-for="btn in row.buttons"
+        :key="btn.key"
         type="button"
-        :data-key="button.key"
-        :class="[
-          button.extraClass,
-          { 'is-pressed': pressedKey === button.key }
-        ]"
+        :data-key="btn.key"
+        :class="[btn.extraClass, { 'is-pressed': pressedKey === btn.key }]"
         @pointerdown="handlePointerDown"
         @pointerup="handlePointerUp"
         @pointercancel="clearPressedKey"
         @blur="clearPressedKey"
       >
-        <span :class="button.labelClass">
-          <component :is="button.icon" v-if="button.icon" class="h-2.5 w-2.5" />
-          <template v-else>{{ button.label ?? button.key }}</template>
+        <span :class="btn.labelClass">
+          <component :is="btn.icon" v-if="btn.icon" class="h-2.5 w-2.5" />
+          <template v-else>{{ btn.label ?? btn.key }}</template>
         </span>
       </button>
     </div>

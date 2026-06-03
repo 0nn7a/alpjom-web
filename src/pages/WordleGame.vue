@@ -4,10 +4,17 @@ import { computed, onMounted } from 'vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import KeyBoard from '@/components/KeyBoard.vue';
 import { useToastStore } from '@/stores/toast.ts';
+import {
+  normalizeWordleDifficulty,
+  normalizeWordleMode
+} from '@/utils/wordle.ts';
 
 const route = useRoute();
 const toastStore = useToastStore();
-const mode = computed(() => route.params.mode);
+const mode = computed(() => normalizeWordleMode(route.params.mode));
+const difficulty = computed(() =>
+  normalizeWordleDifficulty(route.params.difficulty)
+);
 
 const guesses = [
   {
@@ -34,7 +41,7 @@ const handleKeyPress = (key: string) => {
 };
 
 onMounted(async () => {
-  console.log(mode.value);
+  console.log({ mode: mode.value, difficulty: difficulty.value });
 });
 </script>
 

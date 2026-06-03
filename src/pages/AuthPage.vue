@@ -199,11 +199,7 @@ const handleSubmit = async () => {
       </FormInput>
     </form>
 
-    <button
-      type="submit"
-      form="auth-form"
-      class="py-1 px-3 bg-(--aj-color-surface) border border-(--aj-color-border) rounded-md cursor-pointer transition duration-300 hover:border-(--aj-color-border-active)"
-    >
+    <button type="submit" form="auth-form" class="btn-primary">
       {{ action }}
     </button>
     <RouterLink

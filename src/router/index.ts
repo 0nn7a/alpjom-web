@@ -4,6 +4,10 @@ import { getToken } from '@/utils/jwt.ts';
 import { clearSession, refreshAccessToken } from '@/services/session';
 import { useToastStore } from '@/stores/toast.ts';
 import { ApiError } from '@/types/common.ts';
+import {
+  normalizeWordleDifficulty,
+  normalizeWordleMode
+} from '@/utils/wordle.ts';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -37,7 +41,13 @@ const routes: RouteRecordRaw[] = [
         path: 'wordle',
         children: [
           {
-            path: ':mode(daily|practice)',
+            path: '',
+            name: 'wordle-setup',
+            component: () => import('@/pages/WordleSetup.vue'),
+            meta: { auth: true }
+          },
+          {
+            path: ':mode(daily|practice)/:difficulty(easy|normal|hard)',
             name: 'wordle-game',
             component: () => import('@/pages/WordleGame.vue'),
             meta: { auth: true }
@@ -70,6 +80,26 @@ const router = createRouter({
 
 // 全域守衛：驗證登入狀態
 router.beforeEach(async (to) => {
+  // 阻止用戶進入不合法的 wordle 遊戲
+  const wordleMode = normalizeWordleMode(to.params.mode);
+  const wordleDifficulty = normalizeWordleDifficulty(to.params.difficulty);
+
+  if (
+    to.name === 'wordle-game' &&
+    wordleMode === 'daily' &&
+    wordleDifficulty !== 'normal'
+  ) {
+    return {
+      name: 'wordle-game',
+      replace: true,
+      params: {
+        mode: 'daily',
+        difficulty: 'normal'
+      }
+    };
+  }
+
+  // 驗證身分及路由放行
   const requiresAuth = to.matched.some((route) => route.meta.auth);
   const isAuthPage = to.name === 'login' || to.name === 'register';
   const token = getToken();
