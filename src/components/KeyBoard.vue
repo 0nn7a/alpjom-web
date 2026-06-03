@@ -151,7 +151,7 @@ const playPressSound = async () => {
   const gain = context.createGain();
 
   source.buffer = pressBuffer;
-  gain.gain.value = 0.35;
+  gain.gain.value = 0.2;
 
   source.connect(gain);
   gain.connect(context.destination);
@@ -171,6 +171,10 @@ const emit = defineEmits<{
 const pressedKey = ref<string | null>(null);
 const clearPressedKey = () => {
   pressedKey.value = null;
+};
+const clearPressedKeyForKey = (key: string) => {
+  if (pressedKey.value !== key) return;
+  clearPressedKey();
 };
 
 // 判斷是否為支援按鍵
@@ -200,8 +204,8 @@ const handlePointerDown = (event: PointerEvent) => {
 };
 
 // 虛擬鍵盤鬆開
-const handlePointerUp = () => {
-  clearPressedKey();
+const handlePointerUp = (key: string) => {
+  clearPressedKeyForKey(key);
 };
 
 // 實體鍵盤按下
@@ -225,7 +229,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 // 實體鍵盤鬆開
 const handleKeyUp = (event: KeyboardEvent) => {
   const key = normalizeKey(event.key);
-  if (pressedKey.value === key) clearPressedKey();
+  clearPressedKeyForKey(key);
 };
 
 onMounted(() => {
@@ -270,9 +274,9 @@ onBeforeUnmount(() => {
         :data-key="btn.key"
         :class="[btn.extraClass, { 'is-pressed': pressedKey === btn.key }]"
         @pointerdown="handlePointerDown"
-        @pointerup="handlePointerUp"
-        @pointercancel="clearPressedKey"
-        @blur="clearPressedKey"
+        @pointerup="handlePointerUp(btn.key)"
+        @pointercancel="clearPressedKeyForKey(btn.key)"
+        @blur="clearPressedKeyForKey(btn.key)"
       >
         <span :class="btn.labelClass">
           <component :is="btn.icon" v-if="btn.icon" class="h-3 w-3" />
