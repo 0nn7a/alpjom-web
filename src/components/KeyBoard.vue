@@ -71,12 +71,100 @@ const keyboardRows: KeyboardRow[] = [
   }
 ];
 
+// 敲擊鍵盤音效
+// 最簡單的音效寫法是：new Audio('sound.mp3').play()
+// 但 Safari 對這種方式反應很慢，因為每次都要重新建立物件、解碼音檔，來不及處理就跳過了
+// 所以改用 Web Audio API，核心概念是把音效的「載入」和「播放」完全分開
+
+// 做法是先把 mp3 解碼成 AudioBuffer，之後每次按鍵都只建立新的播放來源
+let audioContext: AudioContext | null = null; // 類似錄音室，代表整個音訊環境
+let pressBuffer: AudioBuffer | null = null; // 已經解碼好的音效資料
+let audioLoadTask: Promise<void> | null = null; // 預載中的任務，避免重複抓同一份音檔
+let audioWarmedUp = false; // 預熱音效（在初次觸發虛擬鍵盤時）
+
+const getAudioContext = () => {
+  if (typeof window === 'undefined') return null;
+
+  // Safari 與其他瀏覽器的 AudioContext 取得方式不完全一樣，這裡做相容處理
+  const AudioContextCtor =
+    window.AudioContext ||
+    (window as Window & { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext;
+
+  if (!AudioContextCtor) return null;
+  if (!audioContext) audioContext = new AudioContextCtor();
+
+  return audioContext;
+};
+
+const loadPressBuffer = async () => {
+  if (typeof window === 'undefined' || pressBuffer) return;
+
+  const context = getAudioContext();
+  if (!context) return;
+
+  // 先把靜態音檔抓下來，再交給 Web Audio 解碼成可直接播放的緩衝資料
+  // 這樣按鍵當下就不用再做檔案載入或解碼，播放會快很多
+  const response = await fetch(keyboardTapSoundUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  pressBuffer = await context.decodeAudioData(arrayBuffer);
+};
+
+const ensureAudioLoaded = () => {
+  if (!audioLoadTask) {
+    // 只建立一次載入任務，避免元件掛載或多次互動時重複抓同一份音檔
+    audioLoadTask = loadPressBuffer().catch(() => {
+      pressBuffer = null;
+    });
+  }
+
+  return audioLoadTask;
+};
+
+const warmUpAudio = () => {
+  if (audioWarmedUp) return;
+  audioWarmedUp = true;
+  void ensureAudioLoaded();
+};
+
+const playPressSound = async () => {
+  const context = getAudioContext();
+  if (!context) return;
+
+  await ensureAudioLoaded();
+  if (!pressBuffer) return;
+
+  // Safari 常會把音訊上下文維持在 suspended，這裡先嘗試恢復
+  if (context.state === 'suspended') {
+    // 即使出錯也不管，讓聲音繼續嘗試播放
+    context.resume().catch(() => {});
+  }
+
+  // 每次播放都建立新的 source
+  // 這是關鍵，因為同一個 source 不能重複播放，也不會被後續按鍵覆蓋
+  const source = context.createBufferSource();
+  // 用 gain 控制音量，避免直接把原始音檔音量放得太大
+  const gain = context.createGain();
+
+  source.buffer = pressBuffer;
+  gain.gain.value = 0.35;
+
+  source.connect(gain);
+  gain.connect(context.destination);
+  source.start();
+  source.onended = () => {
+    // 播放完後手動斷開連線，讓瀏覽器盡快回收資源
+    source.disconnect();
+    gain.disconnect();
+  };
+};
+
+// 傳遞當前被敲擊的鍵
 const emit = defineEmits<{
   (event: 'press', key: string): void;
 }>();
 
 const pressedKey = ref<string | null>(null);
-
 const clearPressedKey = () => {
   pressedKey.value = null;
 };
@@ -93,40 +181,29 @@ const normalizeKey = (key: string) => {
   return key;
 };
 
-// 播放敲擊鍵盤音效
-const playPressSound = () => {
-  if (typeof window === 'undefined') return;
-
-  const audio = new Audio(keyboardTapSoundUrl);
-  audio.volume = 0.3;
-  void audio.play().catch(() => {
-    // 瀏覽器若擋掉播放，就安靜失敗，不影響按鍵本身。
-  });
-};
-
 // 虛擬鍵盤點擊
 const handlePointerDown = (event: PointerEvent) => {
+  warmUpAudio();
+
   const target = event.currentTarget as HTMLButtonElement | null;
   const key = target?.dataset.key;
   if (!key || !target) return;
 
   pressedKey.value = key;
   void playPressSound();
+  emit('press', key);
   target.setPointerCapture(event.pointerId);
 };
 
 // 虛擬鍵盤鬆開
-const handlePointerUp = (event: PointerEvent) => {
-  const target = event.currentTarget as HTMLButtonElement | null;
-  const key = target?.dataset.key;
-  if (!key) return;
-
-  emit('press', key);
+const handlePointerUp = () => {
   clearPressedKey();
 };
 
 // 實體鍵盤按下
 const handleKeyDown = (event: KeyboardEvent) => {
+  warmUpAudio();
+
   const key = normalizeKey(event.key);
 
   // 排除虛擬鍵盤以外的鍵 + 長按時避免連發
@@ -161,6 +238,15 @@ onBeforeUnmount(() => {
   window.removeEventListener('keyup', handleKeyUp);
   window.removeEventListener('blur', clearPressedKey);
   document.removeEventListener('visibilitychange', clearPressedKey);
+
+  if (audioContext) {
+    // 關閉音訊上下文，避免元件卸載後仍持有瀏覽器資源，不需處理錯誤
+    void audioContext.close().catch(() => {});
+    audioContext = null;
+  }
+  pressBuffer = null;
+  audioLoadTask = null;
+  audioWarmedUp = false;
 });
 </script>
 
@@ -218,28 +304,28 @@ html[data-theme='dark'] .keyboard {
 }
 
 button {
-  @apply flex justify-center items-center p-1 font-normal text-[0.55rem] text-(--aj-color-muted) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-all duration-150 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
+  @apply flex justify-center items-center p-1 font-normal text-[0.55rem] text-(--aj-color-muted) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-transform duration-100 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
   background: radial-gradient(
     75% 75% at 50% 5%,
     var(--keycap-top) 0%,
     var(--keycap-bottom) 100%
   );
   box-shadow:
-    inset 0 0.05rem 1px 1px var(--keycap-highlight),
-    0 0 0.05rem 0 var(--keycap-shadow),
-    0 0.05rem 0.05rem 0 var(--keycap-shadow);
+    inset 0 0.04rem 0.08rem 0.02rem var(--keycap-highlight),
+    0 0.03rem 0.06rem 0 var(--keycap-shadow);
   -webkit-tap-highlight-color: transparent; /* 關掉預設的藍/灰色高亮 */
+  will-change: transform;
 }
 
 @media (hover: hover) and (pointer: fine) {
   button:hover {
-    @apply text-(--aj-color-text) border-(--keycap-border-active) translate-y-[-1%];
+    @apply text-(--aj-color-text) border-(--keycap-border-active) translate-y-[-0.05rem];
   }
 }
 
 button:active,
 button.is-pressed {
-  @apply translate-y-[2%];
+  @apply translate-y-[0.05rem];
   box-shadow:
     inset 0 1px 1px 1px var(--keycap-bottom),
     inset 0 -1px 3px 0 var(--keycap-highlight),
@@ -248,7 +334,7 @@ button.is-pressed {
 }
 
 span {
-  @apply transition-all duration-100;
+  @apply transition-transform duration-100;
 }
 
 button.plus {
