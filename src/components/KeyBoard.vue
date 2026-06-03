@@ -21,7 +21,6 @@ type KeyboardRow = {
 const keyboardRows: KeyboardRow[] = [
   {
     id: 'top-row',
-    offsetClass: 'translate-x-3',
     buttons: [
       { key: 'Q' },
       { key: 'W' },
@@ -37,6 +36,7 @@ const keyboardRows: KeyboardRow[] = [
   },
   {
     id: 'middle-row',
+    offsetClass: 'translate-x-3.5',
     buttons: [
       { key: 'A' },
       { key: 'S' },
@@ -46,19 +46,18 @@ const keyboardRows: KeyboardRow[] = [
       { key: 'H' },
       { key: 'J' },
       { key: 'K' },
-      { key: 'L' },
-      {
-        key: 'Enter',
-        extraClass: 'plus',
-        label: '↵',
-        labelClass: 'translate-y-0.5'
-      }
+      { key: 'L' }
     ]
   },
   {
     id: 'bottom-row',
-    offsetClass: 'translate-x-6',
+    offsetClass: 'translate-x-3.5',
     buttons: [
+      {
+        key: 'Backspace',
+        extraClass: 'plus justify-self-end',
+        icon: BackspaceIcon
+      },
       { key: 'Z' },
       { key: 'X' },
       { key: 'C' },
@@ -66,7 +65,12 @@ const keyboardRows: KeyboardRow[] = [
       { key: 'B' },
       { key: 'N' },
       { key: 'M' },
-      { key: 'Backspace', extraClass: 'plus', icon: BackspaceIcon }
+      {
+        key: 'Enter',
+        extraClass: 'plus',
+        label: '↵',
+        labelClass: 'translate-y-0.5'
+      }
     ]
   }
 ];
@@ -300,7 +304,7 @@ html[data-theme='dark'] .keyboard {
 }
 
 .keyboard-row {
-  @apply w-full grid grid-cols-11 gap-0.5 text-center;
+  @apply w-full grid grid-cols-10 gap-0.5 text-center;
 }
 
 button {
@@ -323,7 +327,6 @@ button {
   }
 }
 
-button:active,
 button.is-pressed {
   @apply translate-y-[0.05rem];
   box-shadow:
@@ -338,6 +341,6 @@ span {
 }
 
 button.plus {
-  @apply col-span-2 justify-end items-end aspect-auto;
+  @apply justify-end items-end aspect-auto w-[150%];
 }
 </style>
