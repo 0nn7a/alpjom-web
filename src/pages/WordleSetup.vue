@@ -131,7 +131,7 @@ const startGame = () => {
 @reference '@/assets/styles/style.css';
 
 .item-box {
-  @apply py-5 px-4 flex flex-col text-center text-(--aj-color-muted) bg-(--aj-color-surface) border border-transparent ring-2 ring-transparent rounded cursor-pointer select-none transition-all duration-300;
+  @apply py-5 px-3.5 flex flex-col text-center text-(--aj-color-muted) bg-(--aj-color-surface) border border-transparent ring-2 ring-transparent rounded cursor-pointer select-none transition-all duration-300;
 }
 .item-box:not(.disabled):hover {
   @apply border-(--aj-color-border);

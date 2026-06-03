@@ -256,7 +256,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="keyboard grow flex flex-col items-center gap-0.5 scale-125 origin-bottom select-none"
+    class="keyboard grow flex flex-col items-center gap-0.5 scale-115 origin-bottom select-none"
   >
     <div
       v-for="row in keyboardRows"
@@ -308,7 +308,7 @@ html[data-theme='dark'] .keyboard {
 }
 
 button {
-  @apply flex justify-center items-center p-1 font-normal text-[0.55rem] text-(--aj-color-muted) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-transform duration-100 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
+  @apply flex justify-center items-center p-1 font-normal text-[0.55rem] text-(--aj-color-text) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-transform duration-100 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
   background: radial-gradient(
     75% 75% at 50% 5%,
     var(--keycap-top) 0%,
@@ -323,7 +323,7 @@ button {
 
 @media (hover: hover) and (pointer: fine) {
   button:hover {
-    @apply text-(--aj-color-text) border-(--keycap-border-active) translate-y-[-0.05rem];
+    @apply border-(--keycap-border-active) translate-y-[-0.05rem];
   }
 }
 

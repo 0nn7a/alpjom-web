@@ -29,7 +29,7 @@ const toneIcons: Record<ToastTone, Component> = {
 <template>
   <Teleport to="#toast">
     <div
-      class="w-full w-max-96 px-10 pointer-events-none fixed left-1/2 top-5 z-9999 flex -translate-x-1/2 flex-col items-center gap-2"
+      class="w-full w-max-96 px-8 pointer-events-none fixed left-1/2 top-5 z-9999 flex -translate-x-1/2 flex-col items-center gap-2"
       role="status"
       aria-live="polite"
       aria-atomic="false"

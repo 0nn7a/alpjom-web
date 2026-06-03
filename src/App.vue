@@ -13,7 +13,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="w-full max-w-96 flex flex-col px-10">
+  <main class="w-full max-w-96 flex flex-col px-8">
     <ToastHost />
     <RouterView :key="route.name" />
   </main>
