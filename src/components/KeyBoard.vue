@@ -275,7 +275,7 @@ onBeforeUnmount(() => {
         @blur="clearPressedKey"
       >
         <span :class="btn.labelClass">
-          <component :is="btn.icon" v-if="btn.icon" class="h-2.5 w-2.5" />
+          <component :is="btn.icon" v-if="btn.icon" class="h-3 w-3" />
           <template v-else>{{ btn.label ?? btn.key }}</template>
         </span>
       </button>
@@ -308,7 +308,7 @@ html[data-theme='dark'] .keyboard {
 }
 
 button {
-  @apply flex justify-center items-center p-1 font-normal text-[0.55rem] text-(--aj-color-text) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-transform duration-100 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
+  @apply flex justify-center items-center p-1 font-normal text-[0.6rem] text-(--aj-color-text) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-transform duration-100 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
   background: radial-gradient(
     75% 75% at 50% 5%,
     var(--keycap-top) 0%,
