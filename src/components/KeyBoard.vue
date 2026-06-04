@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Component } from 'vue';
+import { type Component, computed } from 'vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { BackspaceIcon } from '@heroicons/vue/24/outline';
 import keyboardTapSoundUrl from '@/assets/sounds/keyboard-tap.mp3';
@@ -74,6 +74,36 @@ const keyboardRows: KeyboardRow[] = [
     ]
   }
 ];
+
+type KeyboardKeyDecoration = {
+  keys: Set<string>;
+  className: string;
+};
+
+// 外層組件給獨立按鍵傳遞指定樣式
+interface KeyBoardProps {
+  keyDecorations?: KeyboardKeyDecoration[];
+}
+const props = withDefaults(defineProps<KeyBoardProps>(), {
+  keyDecorations: () => []
+});
+const keyboardRowsWrapped = computed(() => {
+  return keyboardRows.map((row) => ({
+    ...row,
+    buttons: row.buttons.map((button) => {
+      const classNames = props.keyDecorations
+        .filter((decoration) => decoration.keys.has(button.key))
+        .map((decoration) => decoration.className);
+
+      if (!classNames.length) return button;
+
+      return {
+        ...button,
+        extraClass: [button.extraClass, ...classNames].filter(Boolean).join(' ')
+      };
+    })
+  }));
+});
 
 // 敲擊鍵盤音效
 // 最簡單的音效寫法是：new Audio('sound.mp3').play()
@@ -260,10 +290,10 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="keyboard grow flex flex-col items-center gap-0.5 scale-115 origin-bottom select-none"
+    class="keyboard grow flex flex-col items-center gap-0.5 origin-bottom select-none"
   >
     <div
-      v-for="row in keyboardRows"
+      v-for="row in keyboardRowsWrapped"
       :key="row.id"
       :class="['keyboard-row', row.offsetClass]"
     >
@@ -297,6 +327,7 @@ onBeforeUnmount(() => {
   --keycap-border: #e3e3e3;
   --keycap-border-active: #c8c8c8;
   --keycap-shadow: #e6e6e6;
+  --keycap-text: var(--aj-color-text);
 }
 html[data-theme='dark'] .keyboard {
   --keycap-top: #232323;
@@ -305,6 +336,7 @@ html[data-theme='dark'] .keyboard {
   --keycap-border: #464646;
   --keycap-border-active: #646464;
   --keycap-shadow: #0a0a0a;
+  --keycap-text: var(--aj-color-text);
 }
 
 .keyboard-row {
@@ -312,7 +344,7 @@ html[data-theme='dark'] .keyboard {
 }
 
 button {
-  @apply flex justify-center items-center p-1 font-normal text-[0.6rem] text-(--aj-color-text) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-transform duration-100 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
+  @apply flex justify-center items-center p-1 font-normal text-[0.6rem] text-(--keycap-text) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-transform duration-100 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
   background: radial-gradient(
     75% 75% at 50% 5%,
     var(--keycap-top) 0%,
@@ -323,6 +355,10 @@ button {
     0 0.03rem 0.06rem 0 var(--keycap-shadow);
   -webkit-tap-highlight-color: transparent; /* 關掉預設的藍/灰色高亮 */
   will-change: transform;
+}
+
+button.plus {
+  @apply justify-end items-end aspect-auto w-[150%];
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -344,7 +380,7 @@ span {
   @apply transition-transform duration-100;
 }
 
-button.plus {
-  @apply justify-end items-end aspect-auto w-[150%];
+.dimmed {
+  --keycap-text: var(--aj-color-subtle);
 }
 </style>

@@ -1,0 +1,40 @@
+import type { WordleDifficulty, WordleMode } from '@/utils/wordle.ts';
+
+// 開始遊戲
+export interface WordleStartRequest {
+  mode: WordleMode;
+  difficulty: WordleDifficulty;
+}
+export interface WordleStartResponse {
+  gameId: number;
+  maxGuesses: number; // 0 -> 無限
+}
+
+// 猜題結果
+export type LetterResult = 'G' | 'Y' | 'W'; // 標記每個字符的狀況：G全對｜Y位置錯｜W不存在
+export interface Guess {
+  guessWord: string;
+  result: string; // 將會是由 LetterResult 字符組成的字串，例如 "GYWWG"
+}
+
+// 送出猜題
+export interface WordleGuessRequest {
+  gameId: number;
+  guessWord: string;
+}
+export interface WordleGuessResponse {
+  guess: Guess;
+  isWin: boolean; // 1/0 -> true/false, null -> ing
+  answer: string; // 只在遊戲結束後回傳，避免失敗後不知道答案
+}
+
+// 整局遊戲資料
+export interface WordleGameResponse {
+  gameId: number;
+  mode: WordleMode;
+  difficulty: WordleDifficulty;
+  maxGuesses: number;
+  isWin: boolean;
+  answer: string;
+  guesses: Guess[]; // 該局遊戲所有猜測紀錄，依 createdAt 排序
+}

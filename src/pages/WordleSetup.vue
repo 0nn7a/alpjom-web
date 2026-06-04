@@ -2,29 +2,31 @@
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToastStore } from '@/stores/toast.ts';
 import {
-  WORDLE_DIFFICULTIES,
-  WORDLE_MODES,
+  DAILY_MODE,
+  EASY_DIFFICULTY,
+  HARD_DIFFICULTY,
+  NORMAL_DIFFICULTY,
+  PRACTICE_MODE,
   type WordleDifficulty,
   type WordleMode
 } from '@/utils/wordle.ts';
 
 const router = useRouter();
-const [DAILY_MODE, PRACTICE_MODE] = WORDLE_MODES;
-const [EASY_DIFFICULTY, NORMAL_DIFFICULTY, HARD_DIFFICULTY] =
-  WORDLE_DIFFICULTIES;
+const toastStore = useToastStore();
 
 const modeOptions = [
   {
     id: `wordle-mode-${DAILY_MODE}`,
     value: DAILY_MODE,
-    label: DAILY_MODE.toUpperCase(),
+    label: DAILY_MODE,
     description: '每日謎題'
   },
   {
     id: `wordle-mode-${PRACTICE_MODE}`,
     value: PRACTICE_MODE,
-    label: PRACTICE_MODE.toUpperCase(),
+    label: PRACTICE_MODE,
     description: '練習'
   }
 ] as const;
@@ -33,32 +35,36 @@ const difficultyOptions = [
   {
     id: `wordle-difficulty-${EASY_DIFFICULTY}`,
     value: EASY_DIFFICULTY,
-    label: EASY_DIFFICULTY.toUpperCase(),
+    label: EASY_DIFFICULTY,
     description: '無限制'
   },
   {
     id: `wordle-difficulty-${NORMAL_DIFFICULTY}`,
     value: NORMAL_DIFFICULTY,
-    label: NORMAL_DIFFICULTY.toUpperCase(),
+    label: NORMAL_DIFFICULTY,
     description: '6次機會'
   },
   {
     id: `wordle-difficulty-${HARD_DIFFICULTY}`,
     value: HARD_DIFFICULTY,
-    label: HARD_DIFFICULTY.toUpperCase(),
+    label: HARD_DIFFICULTY,
     description: '3次機會'
   }
 ] as const;
 
 const mode = ref<WordleMode>(DAILY_MODE);
-const isDifficultyLocked = computed(() => mode.value === DAILY_MODE);
 const difficulty = ref<WordleDifficulty>(NORMAL_DIFFICULTY);
-
+const isDifficultyLocked = computed(() => mode.value === DAILY_MODE);
 watch(mode, (nextMode) => {
   if (nextMode === DAILY_MODE) difficulty.value = NORMAL_DIFFICULTY;
 });
 
 const startGame = () => {
+  if (mode.value === PRACTICE_MODE) {
+    toastStore.notify('該模式開發中，敬請期待！', { tone: 'warning' });
+    return;
+  }
+
   router.push({
     name: 'wordle-game',
     params: { mode: mode.value, difficulty: difficulty.value }

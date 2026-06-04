@@ -1,13 +1,23 @@
-import type { RegisterRequest } from '@/types/auth.ts';
 import type { ApiResponse } from '@/types/common.ts';
 import { api } from '@/services/api.ts';
 import { API } from '@/utils/constant.ts';
+import type {
+  WordleGameResponse,
+  WordleGuessRequest,
+  WordleGuessResponse,
+  WordleStartRequest,
+  WordleStartResponse
+} from '@/types/wordle.ts';
 
 export const wordleService = {
-  start: (data: RegisterRequest): Promise<ApiResponse<void>> =>
+  start: (
+    data: WordleStartRequest
+  ): Promise<ApiResponse<WordleStartResponse>> =>
     api.post(API.WORDLE.START, data),
-  guess: (data: RegisterRequest): Promise<ApiResponse<void>> =>
+  guess: (
+    data: WordleGuessRequest
+  ): Promise<ApiResponse<WordleGuessResponse>> =>
     api.post(API.WORDLE.GUESS, data),
-  game: (gameId: Number): Promise<ApiResponse<void>> =>
+  game: (gameId: Number): Promise<ApiResponse<WordleGameResponse>> =>
     api.get(`${API.WORDLE.GAME}/${gameId}`)
 };

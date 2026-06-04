@@ -130,6 +130,14 @@ html[data-theme=dark] {
   );
 }
 
+@keyframes blink {
+  0%, 100% {
+    border-color: transparent;
+  }
+  50% {
+    border-color: inherit;
+  }
+}
 ::-webkit-scrollbar {
   display: none;
 }
@@ -150,6 +158,7 @@ html {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 body,
