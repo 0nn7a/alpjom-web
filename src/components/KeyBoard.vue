@@ -36,7 +36,7 @@ const keyboardRows: KeyboardRow[] = [
   },
   {
     id: 'middle-row',
-    offsetClass: 'translate-x-3.5',
+    offsetClass: 'translate-x-4.5',
     buttons: [
       { key: 'A' },
       { key: 'S' },
@@ -51,7 +51,7 @@ const keyboardRows: KeyboardRow[] = [
   },
   {
     id: 'bottom-row',
-    offsetClass: 'translate-x-3.5',
+    offsetClass: 'translate-x-4.5',
     buttons: [
       {
         key: 'Backspace',
