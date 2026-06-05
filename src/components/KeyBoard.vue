@@ -69,7 +69,7 @@ const keyboardRows: KeyboardRow[] = [
         key: 'Enter',
         extraClass: 'plus',
         label: '↵',
-        labelClass: 'translate-y-0.5'
+        labelClass: 'text-xs translate-y-0.5'
       }
     ]
   }
@@ -309,7 +309,7 @@ onBeforeUnmount(() => {
         @blur="clearPressedKeyForKey(btn.key)"
       >
         <span :class="btn.labelClass">
-          <component :is="btn.icon" v-if="btn.icon" class="h-3 w-3" />
+          <component :is="btn.icon" v-if="btn.icon" class="h-4 w-4" />
           <template v-else>{{ btn.label ?? btn.key }}</template>
         </span>
       </button>
@@ -344,7 +344,7 @@ html[data-theme='dark'] .keyboard {
 }
 
 button {
-  @apply flex justify-center items-center p-1 font-normal text-[0.6rem] text-(--keycap-text) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-transform duration-100 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
+  @apply flex justify-center items-center p-1 font-normal text-sm text-(--keycap-text) border-[0.01rem] border-(--keycap-border) aspect-square rounded-sm transition-transform duration-100 touch-manipulation; /* 去掉 double-tap zoom 延遲 */
   background: radial-gradient(
     75% 75% at 50% 5%,
     var(--keycap-top) 0%,
