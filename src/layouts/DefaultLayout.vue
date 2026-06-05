@@ -6,9 +6,9 @@ import DropMenu from '@/components/DropMenu.vue';
 
 <template>
   <section
-    class="h-full w-full flex flex-col items-center my-3 gap-y-4 overflow-y-hidden"
+    class="h-full w-full flex flex-col items-center my-3 p-4 gap-y-4 overflow-y-hidden"
   >
-    <header class="shrink-0 w-full flex items-center">
+    <header class="shrink-0 -m-4 mb-0 w-full flex items-center">
       <DropMenu>
         <template #trigger="{ toggle, open }">
           <Bars2Icon
@@ -25,11 +25,11 @@ import DropMenu from '@/components/DropMenu.vue';
       </div>
     </header>
 
-    <div class="grow w-full flex overflow-y-hidden">
+    <div class="grow -mx-4 w-full flex overflow-y-hidden">
       <slot />
     </div>
 
-    <footer class="shrink-0 w-full flex">
+    <footer class="shrink-0 -m-4 mt-0 w-full flex">
       <slot name="footer" />
     </footer>
   </section>
