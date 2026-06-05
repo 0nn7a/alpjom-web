@@ -42,7 +42,10 @@ const value = defineModel<string>({ default: '' });
       class="flex items-center py-1.5 px-3 font-normal text-(--aj-color-text) border border-(--aj-color-border) rounded-lg transition duration-300 has-focus:ring-2"
       :class="[
         showError && error
-          ? ['border-(--aj-color-danger)', 'ring-(--aj-color-danger-ring)']
+          ? [
+              'border-(--aj-color-danger-border)',
+              'ring-(--aj-color-danger-ring)'
+            ]
           : [
               'has-focus:border-(--aj-color-border-active)',
               'ring-(--aj-color-ring)'

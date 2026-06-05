@@ -85,7 +85,7 @@ onMounted(async () => {
         </ul>
       </div>
 
-      <p class="mx-auto my-3 text-sm text-(--aj-color-subtle)">
+      <p class="mx-auto my-3 text-xs text-(--aj-color-subtle)">
         ↑ 以上紀錄猜過的詞 ↑
       </p>
 

@@ -1,15 +1,24 @@
 <script setup lang="ts">
+import { Bars2Icon } from '@heroicons/vue/24/outline';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import DropMenu from '@/components/DropMenu.vue';
 </script>
 
 <template>
   <section
-    class="h-full w-full flex flex-col items-center my-3 gap-y-4 overflow-hidden"
+    class="h-full w-full flex flex-col items-center my-3 gap-y-4 overflow-y-hidden"
   >
     <header class="shrink-0 w-full flex items-center">
-      <RouterLink :to="{ name: 'home' }" class="ms-1 font-semibold text-xl">
-        alpJom
-      </RouterLink>
+      <DropMenu>
+        <template #trigger="{ toggle, open }">
+          <Bars2Icon
+            class="h-9 aspect-square p-1.5 rounded-md cursor-pointer transition-all duration-300 hover:bg-(--aj-color-surface)"
+            :class="{ 'bg-(--aj-color-surface)': open }"
+            @click="toggle"
+          />
+        </template>
+      </DropMenu>
+
       <div class="ms-auto flex items-center gap-2">
         <slot name="header" />
         <ThemeToggle />
