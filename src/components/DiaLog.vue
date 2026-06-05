@@ -40,7 +40,7 @@ onUnmounted(() => {
     <Transition name="fade">
       <div
         v-if="open"
-        class="fixed inset-0 z-50 grid p-4 place-items-center bg-(--aj-color-text)/5 backdrop-blur-sm"
+        class="fixed inset-0 z-50 grid p-3 place-items-center bg-(--aj-color-text)/5 backdrop-blur-sm"
         @click.self="handleOverlayClick"
         role="dialog"
         aria-modal="true"
@@ -50,7 +50,7 @@ onUnmounted(() => {
         <Transition name="dialog-panel">
           <div
             v-if="open"
-            class="relative max-h-full max-w-80 min-w-55 flex flex-col p-4 bg-(--aj-color-bg) border border-(--aj-color-border) rounded-lg shadow-lg overflow-hidden"
+            class="relative max-h-full max-w-full min-w-55 flex flex-col p-4 bg-(--aj-color-bg) border border-(--aj-color-border) rounded-lg shadow-lg overflow-hidden"
           >
             <!-- 關閉按鈕 -->
             <button
