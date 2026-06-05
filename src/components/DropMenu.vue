@@ -126,12 +126,9 @@ function itemClass(item: MenuItem) {
 
     <!-- 下拉面板 -->
     <Transition
+      name="drop"
       :enter-active-class="`transition-all duration-150 ease-out ${props.direction === 'up' ? 'origin-bottom-left' : 'origin-top-left'}`"
       :leave-active-class="`transition-all duration-100 ease-in ${props.direction === 'up' ? 'origin-bottom-left' : 'origin-top-left'}`"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
     >
       <div
         v-if="open"
@@ -264,5 +261,15 @@ function itemClass(item: MenuItem) {
 
 span {
   @include omit-text(1);
+}
+
+.drop-enter-active,
+.drop-leave-active {
+  transition: all 0.2s ease-in-out;
+}
+.drop-enter-from,
+.drop-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
 }
 </style>

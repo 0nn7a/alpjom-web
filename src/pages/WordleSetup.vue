@@ -2,7 +2,6 @@
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useToastStore } from '@/stores/toast.ts';
 import {
   DAILY_MODE,
   EASY_DIFFICULTY,
@@ -12,9 +11,9 @@ import {
   type WordleDifficulty,
   type WordleMode
 } from '@/utils/wordle.ts';
+import DiaLog from '@/components/DiaLog.vue';
 
 const router = useRouter();
-const toastStore = useToastStore();
 
 const modeOptions = [
   {
@@ -59,9 +58,11 @@ watch(mode, (nextMode) => {
   if (nextMode === DAILY_MODE) difficulty.value = NORMAL_DIFFICULTY;
 });
 
+const dialogOpen = ref(false);
+
 const startGame = () => {
   if (mode.value === PRACTICE_MODE) {
-    toastStore.notify('該模式開發中，敬請期待！', { tone: 'warning' });
+    dialogOpen.value = true;
     return;
   }
 
@@ -131,6 +132,22 @@ const startGame = () => {
       </button>
     </section>
   </DefaultLayout>
+
+  <DiaLog
+    v-model="dialogOpen"
+    title="功能開發中"
+    description="筆記：若為 PRACTICE 練習模式，將顯示所有未完成的對局資料，供玩家選擇繼續遊戲或開新一局。若為 DAILY 模式，但該玩家已完成當日謎題，將提示並詢問是否跳轉至該局遊戲分享頁。其餘正常時刻就重複確認是否進入新遊戲即可。"
+  >
+    <template #footer="{ close }">
+      <button
+        type="button"
+        @click="close"
+        class="text-sm text-(--aj-color-subtle) cursor-pointer transition-all duration-300 hover:text-(--aj-color-muted)"
+      >
+        Cancel
+      </button>
+    </template>
+  </DiaLog>
 </template>
 
 <style scoped>
