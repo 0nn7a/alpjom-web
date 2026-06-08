@@ -150,7 +150,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <section class="w-full my-auto flex flex-col justify-center items-center">
+  <section class="w-full m-auto p-8 flex flex-col justify-center items-center">
     <h1 class="font-semibold text-3xl">alpJom</h1>
     <form
       id="auth-form"
