@@ -50,7 +50,7 @@ onUnmounted(() => {
         <Transition name="dialog-panel">
           <div
             v-if="open"
-            class="relative max-h-full max-w-full min-w-55 flex flex-col p-4 bg-(--aj-color-bg) border border-(--aj-color-border) rounded-lg shadow-lg overflow-hidden"
+            class="relative max-h-full w-full max-w-80 min-w-55 flex flex-col p-4 bg-(--aj-color-bg) border border-(--aj-color-border) rounded-lg shadow-lg overflow-hidden"
           >
             <!-- 關閉按鈕 -->
             <button
