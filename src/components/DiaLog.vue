@@ -67,14 +67,14 @@ onUnmounted(() => {
                 <h2
                   v-if="title"
                   id="dialog-title"
-                  class="mr-6 text-lg font-semibold text-(--aj-color-text)"
+                  class="mr-6 font-semibold text-(--aj-color-text)"
                 >
                   {{ title }}
                 </h2>
                 <p
                   v-if="description"
                   id="dialog-description"
-                  class="mt-1.5 text-sm text-(--aj-color-subtle)"
+                  class="text-xs text-(--aj-color-subtle)"
                 >
                   {{ description }}
                 </p>
@@ -83,7 +83,7 @@ onUnmounted(() => {
 
             <!-- Body -->
             <template v-if="$slots.default">
-              <div class="shrink-0 my-4 h-px bg-(--aj-color-ring)" />
+              <div class="shrink-0 mt-2 mb-4 h-px bg-(--aj-color-ring)" />
               <div class="grow overflow-y-auto">
                 <slot />
               </div>

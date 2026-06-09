@@ -2,12 +2,16 @@ import type { ApiResponse } from '@/types/common.ts';
 import { api } from '@/services/api.ts';
 import { API } from '@/utils/constant.ts';
 import type {
+  WordleBeforeDailyResponse,
   WordleGameResponse,
   WordleGuessRequest,
   WordleGuessResponse,
+  WordleOngoing,
+  WordleShareResponse,
   WordleStartRequest,
   WordleStartResponse
 } from '@/types/wordle.ts';
+import type { WordleDifficulty } from '@/utils/wordle.ts';
 
 export const wordleService = {
   start: (
@@ -19,5 +23,15 @@ export const wordleService = {
   ): Promise<ApiResponse<WordleGuessResponse>> =>
     api.post(API.WORDLE.GUESS, data),
   game: (gameId: Number): Promise<ApiResponse<WordleGameResponse>> =>
-    api.get(`${API.WORDLE.GAME}/${gameId}`)
+    api.get(`${API.WORDLE.GAME}/${gameId}`),
+  share: (shareToken: string): Promise<ApiResponse<WordleShareResponse>> =>
+    api.get(`${API.WORDLE.SHARE}/${shareToken}`),
+  beforeDaily: (
+    date: string
+  ): Promise<ApiResponse<WordleBeforeDailyResponse>> =>
+    api.get(API.WORDLE.BEFORE.DAILY, { date }),
+  beforePractice: (
+    difficulty: WordleDifficulty
+  ): Promise<ApiResponse<WordleOngoing[]>> =>
+    api.get(API.WORDLE.BEFORE.PRACTICE, { difficulty })
 };

@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
-import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import KeyBoard from '@/components/KeyBoard.vue';
 import { useToastStore } from '@/stores/toast.ts';
-import {
-  normalizeWordleDifficulty,
-  normalizeWordleMode
-} from '@/utils/wordle.ts';
 import { useWordleStore } from '@/stores/wordle.ts';
 
 const route = useRoute();
+const router = useRouter();
 const toastStore = useToastStore();
 const wordleStore = useWordleStore();
 
@@ -48,13 +45,18 @@ const handleKeyPress = async (key: string) => {
 };
 
 onMounted(async () => {
-  // 初始化遊戲條件
-  wordleStore.mode = normalizeWordleMode(route.params.mode);
-  wordleStore.difficulty = normalizeWordleDifficulty(route.params.difficulty);
-
-  // 開始遊戲、取得遊戲完整資料
-  await wordleStore.start();
-  await wordleStore.game();
+  // 取得遊戲完整資料
+  if (!wordleStore.gameId) {
+    wordleStore.gameId = Number(route.params.gameId);
+  }
+  try {
+    await wordleStore.game();
+  } catch (err) {
+    await router.push({ name: 'wordle-setup' });
+  }
+});
+onBeforeUnmount(() => {
+  wordleStore.reset();
 });
 </script>
 
@@ -86,7 +88,7 @@ onMounted(async () => {
       </div>
 
       <p class="mx-auto my-3 text-xs text-(--aj-color-subtle)">
-        ↑ 以上紀錄猜過的詞 ↑
+        ↑ 以上紀錄猜過的詞，剩餘機會 ↑
       </p>
 
       <div

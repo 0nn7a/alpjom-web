@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import type { Guess, LetterResult } from '@/types/wordle.ts';
+import type { WordleGuess, LetterResult } from '@/types/wordle.ts';
 import { ApiError } from '@/types/common.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { wordleService } from '@/services/wordle.ts';
@@ -20,7 +20,10 @@ export const useWordleStore = defineStore('wordle', () => {
   const maxGuesses = ref<number | null>(null);
   const isWin = ref<boolean | null>(null);
   const answer = ref<string | null>(null);
-  const guesses = ref<Guess[]>([]);
+  const shareToken = ref<string | null>(null);
+  const guesses = ref<WordleGuess[]>([]);
+
+  const tempDate = ref<string>(new Date().toISOString().slice(0, 10));
 
   // Getters
   const isGameOver = computed(
@@ -63,6 +66,7 @@ export const useWordleStore = defineStore('wordle', () => {
     console.log('maxGuesses: ', maxGuesses.value);
     console.log('isWin: ', isWin.value);
     console.log('answer: ', answer.value);
+    console.log('shareToken: ', shareToken.value);
     console.log('guesses: ', guesses.value);
   }
 
@@ -72,7 +76,8 @@ export const useWordleStore = defineStore('wordle', () => {
 
       const { data } = await wordleService.start({
         mode: mode.value,
-        difficulty: difficulty.value
+        difficulty: difficulty.value,
+        date: tempDate.value
       });
       gameId.value = data.gameId;
       maxGuesses.value = data.maxGuesses;
@@ -92,6 +97,7 @@ export const useWordleStore = defineStore('wordle', () => {
       });
       if (data.isWin) isWin.value = data.isWin;
       if (data.answer) answer.value = data.answer;
+      if (data.shareToken) shareToken.value = data.shareToken;
       guesses.value.push(data.guess);
 
       checkData();
@@ -113,12 +119,60 @@ export const useWordleStore = defineStore('wordle', () => {
       isWin.value = data.isWin;
       answer.value = data.answer;
       guesses.value = data.guesses;
+      shareToken.value = data.shareToken;
 
       checkData();
     } catch (err) {
       if (err instanceof ApiError)
         toastStore.notify(err.message, { tone: 'error' });
+      throw err;
     }
+  }
+
+  async function share(shareToken: string) {
+    try {
+      const { data } = await wordleService.share(shareToken);
+      return data;
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+      throw err;
+    }
+  }
+
+  async function beforeDaily() {
+    try {
+      const { data } = await wordleService.beforeDaily(tempDate.value);
+      return data;
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+      throw err;
+    }
+  }
+
+  async function beforePractice(difficulty: WordleDifficulty) {
+    try {
+      const { data } = await wordleService.beforePractice(difficulty);
+      return data;
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+      throw err;
+    }
+  }
+
+  function reset() {
+    gameId.value = null;
+    mode.value = null;
+    difficulty.value = null;
+    maxGuesses.value = null;
+    isWin.value = null;
+    answer.value = null;
+    shareToken.value = null;
+    guesses.value = [];
+
+    checkData();
   }
 
   return {
@@ -128,11 +182,17 @@ export const useWordleStore = defineStore('wordle', () => {
     maxGuesses,
     isWin,
     answer,
+    shareToken,
     guesses,
     isGameOver,
     keyDecorations,
+    checkData,
     start,
     guess,
-    game
+    game,
+    share,
+    beforeDaily,
+    beforePractice,
+    reset
   };
 });

@@ -10,7 +10,12 @@ export const API = {
   WORDLE: {
     START: '/wordle/start',
     GUESS: '/wordle/guess',
-    GAME: '/wordle/game'
+    GAME: '/wordle/game',
+    SHARE: '/wordle/share',
+    BEFORE: {
+      DAILY: '/wordle/before/daily',
+      PRACTICE: '/wordle/before/practice'
+    }
   }
 };
 
