@@ -27,3 +27,7 @@
   -moz-user-select: none;
   -ms-user-select: none;
 }
+
+%btn-base {
+  @apply py-1 px-3 border rounded-md cursor-pointer transition duration-300;
+}
