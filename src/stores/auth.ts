@@ -2,10 +2,12 @@ import { defineStore } from 'pinia';
 import type { LoginRequest, RegisterRequest, User } from '@/types/auth.ts';
 import { ref } from 'vue';
 import { authService } from '@/services/auth.ts';
-import { removeAllTokens, setAllTokens } from '@/utils/jwt.ts';
+import { setAllTokens } from '@/utils/jwt.ts';
 import { ApiError } from '@/types/common.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import router from '@/router';
+import { USER_KEY } from '@/utils/constant.ts';
+import { clearSession } from '@/services/session.ts';
 
 export const useAuthStore = defineStore('auth', () => {
   // States
@@ -15,6 +17,22 @@ export const useAuthStore = defineStore('auth', () => {
   // Getters
 
   // Methods
+  function initUser() {
+    const u = localStorage.getItem(USER_KEY);
+    if (u) {
+      user.value = JSON.parse(u);
+    }
+  }
+
+  function setUser(user: User) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    initUser();
+  }
+
+  function removeUser() {
+    user.value = null;
+  }
+
   async function register(request: RegisterRequest) {
     await authService.register(request);
   }
@@ -22,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(request: LoginRequest) {
     const res = await authService.login(request);
     setAllTokens(res.data);
-    user.value = res.data.user;
+    setUser(res.data.user);
   }
 
   async function logout() {
@@ -36,11 +54,11 @@ export const useAuthStore = defineStore('auth', () => {
           { tone: 'warning' }
         );
     } finally {
-      removeAllTokens();
-      user.value = null;
+      clearSession();
+      removeUser();
       await router.push({ name: 'login' });
     }
   }
 
-  return { register, login, logout };
+  return { user, initUser, register, login, logout };
 });

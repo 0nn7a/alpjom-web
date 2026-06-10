@@ -1,4 +1,4 @@
-import { API } from '@/utils/constant';
+import { API, USER_KEY } from '@/utils/constant';
 import { getRefreshToken, removeAllTokens, setToken } from '@/utils/jwt';
 import { ApiError, type ApiResponse } from '@/types/common';
 import type { RefreshResponse } from '@/types/auth';
@@ -58,4 +58,5 @@ export async function refreshAccessToken(): Promise<void> {
 
 export function clearSession(): void {
   removeAllTokens();
+  localStorage.removeItem(USER_KEY);
 }
