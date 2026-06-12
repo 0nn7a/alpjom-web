@@ -103,7 +103,7 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .dialog-panel-enter-active,
 .dialog-panel-leave-active {
   transition: all 0.2s ease-in-out;

@@ -1,0 +1,16 @@
+@utility btn-base {
+  @apply py-1 px-3 border rounded-md cursor-pointer transition duration-300;
+}
+
+.btn-primary {
+  @apply btn-base text-(--aj-color-text) bg-(--aj-color-surface) border-(--aj-color-border) hover:border-(--aj-color-border-active);
+}
+.btn-danger {
+  @apply btn-base text-(--aj-tone-error-text) bg-(--aj-tone-error-shadow) border-(--aj-tone-error-border) hover:border-(--aj-tone-danger-text);
+}
+.btn-success {
+  @apply btn-base text-(--aj-tone-success-text) bg-(--aj-tone-success-shadow) border-(--aj-tone-success-border) hover:border-(--aj-tone-success-text);
+}
+.btn-disabled {
+  @apply btn-base text-(--aj-color-muted) bg-(--aj-color-surface) border-(--aj-color-surface-hover) cursor-not-allowed;
+}

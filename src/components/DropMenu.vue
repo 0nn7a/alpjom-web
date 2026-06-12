@@ -256,11 +256,11 @@ function itemClass(item: MenuItem) {
   </div>
 </template>
 
-<style lang="scss" scoped>
-@use '@/assets/styles/mixins.scss' as *;
+<style scoped>
+@reference '@/assets/styles/style';
 
 span {
-  @include omit-text(1);
+  @apply truncate;
 }
 
 .drop-enter-active,

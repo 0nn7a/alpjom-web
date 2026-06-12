@@ -12,7 +12,7 @@ import DropMenu from '@/components/DropMenu.vue';
       <DropMenu>
         <template #trigger="{ toggle, open }">
           <Bars2Icon
-            class="h-9 aspect-square p-1.5 rounded-md cursor-pointer transition-all duration-300 hover:bg-(--aj-color-surface)"
+            class="h-9 aspect-square p-1.5 border border-(--aj-color-surface-hover) rounded-md cursor-pointer transition-all duration-300 hover:bg-(--aj-color-surface)"
             :class="{ 'bg-(--aj-color-surface)': open }"
             @click="toggle"
           />

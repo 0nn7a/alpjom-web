@@ -318,7 +318,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-@reference "@/assets/styles/style.css";
+@reference "@/assets/styles/style";
 
 .keyboard {
   --keycap-top: #fdfdfd;

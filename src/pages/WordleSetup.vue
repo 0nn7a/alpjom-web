@@ -296,7 +296,7 @@ const confirm = async (
 </template>
 
 <style scoped>
-@reference '@/assets/styles/style.css';
+@reference '@/assets/styles/style';
 
 .item-box {
   @apply py-5 px-3.5 flex flex-col text-center text-(--aj-color-muted) bg-(--aj-color-surface) border border-transparent ring-2 ring-transparent rounded cursor-pointer select-none transition-all duration-300;
