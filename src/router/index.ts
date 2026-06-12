@@ -26,10 +26,10 @@ const routes: RouteRecordRaw[] = [
         path: 'profile',
         children: [
           {
-            path: '',
+            path: ':username',
             name: 'profile',
             component: () => import('@/pages/ProfilePage.vue'),
-            meta: { auth: true }
+            meta: { auth: false }
           }
         ]
       },

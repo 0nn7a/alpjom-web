@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import { useTooltipStore } from '@/stores/tooltip';
 import type { HeatmapRecord, HeatmapCell, HeatmapLevel } from '@/types/heatmap';
-import ToolTip from '@/components/ToolTip.vue';
 
 const tooltipStore = useTooltipStore();
 
@@ -179,19 +178,6 @@ function cellClass(cell: HeatmapCell): string {
   if (cell.isFuture) return 'cell--future';
   return `cell--level-${cell.level}`;
 }
-
-// ── Tooltip 內容格式化 ────────────────────────────────────────────────────────
-function formatDate(content: unknown): string {
-  const { date } = content as HeatmapCell;
-  const [y, m, d] = date.split('-');
-  return `${y} 年 ${parseInt(m)} 月 ${parseInt(d)} 日`;
-}
-
-function formatCount(content: unknown): string {
-  const { count, isFuture } = content as HeatmapCell;
-  if (isFuture) return '—';
-  return count === 0 ? '無完成紀錄' : `完成 ${count} 局`;
-}
 </script>
 
 <template>
@@ -266,17 +252,6 @@ function formatCount(content: unknown): string {
       </template>
     </div>
   </div>
-
-  <ToolTip>
-    <template #default="{ content }">
-      <div class="flex flex-col gap-0.5 text-xs text-center">
-        <p>{{ formatDate(content) }}</p>
-        <p>
-          {{ formatCount(content) }}
-        </p>
-      </div>
-    </template>
-  </ToolTip>
 </template>
 
 <style scoped>

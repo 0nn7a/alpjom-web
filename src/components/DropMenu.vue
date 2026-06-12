@@ -38,7 +38,10 @@ const defaultSections = computed<MenuSection[]>(() => [
     label: 'alpJom',
     items: [
       { label: 'Home', to: { name: 'home' } },
-      { label: 'Profile', to: { name: 'profile' } },
+      {
+        label: 'Profile',
+        to: { name: 'profile', params: { username: authStore.user?.username } }
+      },
       { label: 'Wordle', to: { name: 'wordle-setup' } },
       { label: 'Color', to: { name: 'color' } }
     ]

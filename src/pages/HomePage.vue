@@ -11,31 +11,9 @@ const logout = async () => {
 
 <template>
   <DefaultLayout>
-    <section class="m-auto flex flex-col justify-center items-center gap-y-1">
+    <section class="m-auto flex flex-col justify-center items-center gap-y-3">
       <p class="text-2xl">Welcome to alpJom!</p>
-
-      <RouterLink
-        :to="{ name: 'wordle-setup' }"
-        class="text-sm text-(--aj-color-subtle) transition duration-300 hover:text-(--aj-color-muted)"
-      >
-        → Go to wordle
-      </RouterLink>
-      <RouterLink
-        :to="{ name: 'profile' }"
-        class="text-sm text-(--aj-color-subtle) transition duration-300 hover:text-(--aj-color-muted)"
-      >
-        → Go to profile
-      </RouterLink>
-      <RouterLink
-        :to="{ name: 'color' }"
-        class="text-sm text-(--aj-color-subtle) transition duration-300 hover:text-(--aj-color-muted)"
-      >
-        → Go to color
-      </RouterLink>
-
-      <button type="button" class="mt-6 btn-primary" @click="logout">
-        Logout
-      </button>
+      <button type="button" class="btn-primary" @click="logout">Logout</button>
     </section>
   </DefaultLayout>
 </template>

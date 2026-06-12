@@ -49,7 +49,7 @@ const tooltipStore = useTooltipStore();
 @reference '@/assets/styles/style';
 
 .tooltip {
-  @apply fixed z-9999 py-1 px-2 text-xs text-(--aj-color-bg) bg-(--aj-color-text) rounded pointer-events-none whitespace-nowrap animate-[tooltip-in_0.1s_ease-in_both];
+  @apply fixed z-9999 py-1 px-2 text-xs text-(--aj-color-bg) bg-(--aj-color-text) rounded shadow-sm shadow-neutral-500 pointer-events-none whitespace-nowrap animate-[tooltip-in_0.1s_ease-in_both];
 }
 
 @keyframes tooltip-in {
