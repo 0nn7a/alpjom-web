@@ -27,7 +27,9 @@ export const useWordleStore = defineStore('wordle', () => {
 
   // Getters
   const isGameOver = computed(
-    () => isWin.value !== null || maxGuesses.value === guesses.value.length
+    () =>
+      isWin.value !== null ||
+      (maxGuesses.value && maxGuesses.value === guesses.value.length)
   );
   const keyDecorations = computed(() => {
     const letterState = new Map<string, LetterResult>();

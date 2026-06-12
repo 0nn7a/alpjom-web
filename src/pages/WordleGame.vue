@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import KeyBoard from '@/components/KeyBoard.vue';
 import { useToastStore } from '@/stores/toast.ts';
@@ -16,6 +16,20 @@ const toneClasses: Record<string, string> = {
   Y: 'wordle-y',
   W: 'wordle-w'
 };
+
+const scrollDom = ref<HTMLElement | null>(null);
+async function scrollToBottom() {
+  await nextTick(); // 等 DOM 更新完，新內容算進 scrollHeight
+  const el = scrollDom.value;
+  if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+}
+watch(
+  () => wordleStore.guesses.length,
+  async () => {
+    console.log('guesses changed');
+    await scrollToBottom();
+  }
+);
 
 const inputted = ref('');
 const handleKeyPress = async (key: string) => {
@@ -63,7 +77,10 @@ onBeforeUnmount(() => {
 <template>
   <DefaultLayout>
     <section class="w-full flex flex-col items-center overflow-y-hidden">
-      <div class="grow w-full flex flex-col my-4 overflow-y-auto">
+      <div
+        ref="scrollDom"
+        class="grow w-full flex flex-col my-4 overflow-y-auto"
+      >
         <ul class="mt-auto w-full flex flex-col items-center gap-y-2">
           <li
             v-for="(item, index) in wordleStore.guesses"
@@ -120,7 +137,7 @@ onBeforeUnmount(() => {
   </DefaultLayout>
 </template>
 
-<style lang="scss" scoped>
+<style scoped>
 .wordle-item {
   position: relative;
   color: var(--wordle-text);
