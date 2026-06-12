@@ -257,14 +257,13 @@ function formatCount(content: unknown): string {
 
     <!-- 統計欄 -->
     <div v-if="showStats" class="heatmap__stats">
-      <div
-        v-for="stat in formattedStats"
-        :key="stat.label"
-        class="heatmap__stat"
-      >
-        <span class="heatmap__stat-value">{{ stat.value }}</span>
-        <span class="heatmap__stat-label">{{ stat.label }}</span>
-      </div>
+      <template v-for="(stat, idx) in formattedStats" :key="stat.label">
+        <span v-if="idx !== 0" class="divide-vertical" />
+        <div class="heatmap__stat">
+          <span class="heatmap__stat-label">{{ stat.label }}</span>
+          <span class="heatmap__stat-value">{{ stat.value }}</span>
+        </div>
+      </template>
     </div>
   </div>
 
@@ -380,16 +379,15 @@ html[data-theme='dark'] .cell--future {
 }
 
 .heatmap__stats {
-  @apply flex gap-4;
+  @apply w-full flex justify-between;
 }
 .heatmap__stat {
-  @apply flex items-end gap-1;
+  @apply flex flex-col;
 }
-.heatmap__stat-value {
-  @apply leading-5 text-xl;
-}
-
 .heatmap__stat-label {
   @apply text-xs text-(--aj-color-subtle);
+}
+.heatmap__stat-value {
+  @apply text-(--aj-color-text);
 }
 </style>

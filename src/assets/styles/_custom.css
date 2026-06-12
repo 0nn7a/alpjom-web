@@ -14,3 +14,11 @@
 .btn-disabled {
   @apply btn-base text-(--aj-color-muted) bg-(--aj-color-surface) border-(--aj-color-surface-hover) cursor-not-allowed;
 }
+
+
+@utility divide-vertical {
+  @apply h-full w-0 border-r border-(--aj-color-ring);
+}
+@utility divide-horizontal {
+  @apply h-0 w-full border-b border-(--aj-color-ring);
+}
