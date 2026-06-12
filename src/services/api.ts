@@ -17,6 +17,15 @@ function getAuthHeaders(): Record<string, string> {
   return headers;
 }
 
+// 只有非 FormData 才加 Content-Type
+function getContentType(options?: RequestInit): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (!(options?.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+  return headers;
+}
+
 async function request<T>(
   path: string,
   options?: RequestInit
@@ -25,7 +34,7 @@ async function request<T>(
     const res = await fetch(`${BASE_URL}${path}`, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        ...getContentType(options),
         ...getAuthHeaders(),
         ...options?.headers
       }
@@ -107,5 +116,7 @@ export const api = {
     requestWithRetry<T>(path, { method: 'POST', body: JSON.stringify(body) }),
   put: <T>(path: string, body: unknown) =>
     requestWithRetry<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
-  delete: <T>(path: string) => requestWithRetry<T>(path, { method: 'DELETE' })
+  delete: <T>(path: string) => requestWithRetry<T>(path, { method: 'DELETE' }),
+  upload: <T>(path: string, formData: FormData) =>
+    requestWithRetry<T>(path, { method: 'POST', body: formData })
 };

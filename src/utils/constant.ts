@@ -16,9 +16,13 @@ export const API = {
       DAILY: '/wordle/before/daily',
       PRACTICE: '/wordle/before/practice'
     }
-  }
+  },
+  UPLOAD: '/upload'
 };
 
 // cookie, token
 export const TOKEN_KEY = 'alpjom_token';
 export const REFRESH_TOKEN_KEY = 'alpjom_refresh_token';
+
+// localstorage, user
+export const USER_KEY = 'alpjom-user';
