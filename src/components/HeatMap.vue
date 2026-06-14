@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 import { useTooltipStore } from '@/stores/tooltip';
 import type { HeatmapRecord, HeatmapCell, HeatmapLevel } from '@/types/heatmap';
 import { TaiwanDateStr } from '@/utils/common.ts';
@@ -81,7 +81,7 @@ const weeks = computed<HeatmapCell[][]>(() => {
 /** 月標籤（只在該週是某月第一次出現時才顯示）*/
 const monthLabels = computed<(string | null)[]>(() => {
   const labels: (string | null)[] = [];
-  const seen = new Set<number>();
+  const seen = new Set<string>();
   const MONTHS = [
     '1月',
     '2月',
@@ -100,8 +100,9 @@ const monthLabels = computed<(string | null)[]>(() => {
   // 每個 weekIndex 對應的月份標籤
   for (const week of weeks.value) {
     const month = parseInt(week[0].date.slice(5, 7)) - 1;
-    if (!seen.has(month)) {
-      seen.add(month);
+    const yearMonth = week[0].date.slice(0, 7); // '2025-06'
+    if (!seen.has(yearMonth)) {
+      seen.add(yearMonth);
       labels.push(MONTHS[month]);
     } else {
       labels.push(null);
@@ -164,35 +165,45 @@ function cellClass(cell: HeatmapCell): string {
   if (cell.isFuture) return 'cell--future';
   return `cell--level-${cell.level}`;
 }
+
+// ── 自動滾動到最近月份 ──────────────────────────────────────────────────────────
+const scrollDom = ref<HTMLElement | null>(null);
+async function scrollToEnd() {
+  await nextTick(); // 等 DOM 更新完，新內容算進 scrollHeight
+  const el = scrollDom.value;
+  if (el) el.scrollTo({ left: el.scrollWidth, behavior: 'smooth' });
+}
+onMounted(() => {
+  scrollToEnd();
+});
 </script>
 
 <template>
   <div class="heatmap">
-    <!-- 橫向捲動容器 -->
-    <div class="heatmap__scroll">
-      <div class="heatmap__inner">
-        <!-- 月份標籤列 -->
-        <div class="heatmap__months">
-          <div
-            v-for="(label, wi) in monthLabels"
-            :key="wi"
-            class="heatmap__month-cell"
-          >
-            <span v-if="label" class="heatmap__month-label">{{ label }}</span>
-          </div>
-        </div>
+    <div class="heatmap__cols">
+      <!-- 左側日標籤 -->
+      <div class="heatmap__day-labels">
+        <span
+          v-for="(label, i) in DAY_LABELS"
+          :key="i"
+          class="heatmap__day-label"
+        >
+          {{ label }}
+        </span>
+      </div>
 
-        <!-- 主體：日標籤 + 週欄 -->
-        <div class="heatmap__body">
-          <!-- 左側日標籤 -->
-          <div class="heatmap__day-labels">
-            <span
-              v-for="(label, i) in DAY_LABELS"
-              :key="i"
-              class="heatmap__day-label"
+      <!-- 橫向捲動容器 -->
+      <div class="heatmap__scroll" ref="scrollDom">
+        <div class="heatmap__rows">
+          <!-- 月份標籤列 -->
+          <div class="heatmap__months">
+            <div
+              v-for="(label, wi) in monthLabels"
+              :key="wi"
+              class="heatmap__month-cell"
             >
-              {{ label }}
-            </span>
+              <span v-if="label" class="heatmap__month-label">{{ label }}</span>
+            </div>
           </div>
 
           <!-- 週欄 -->
@@ -287,32 +298,33 @@ html[data-theme='dark'] .cell--future {
   @apply flex flex-col gap-3 select-none;
 }
 
+.heatmap__cols {
+  @apply flex gap-1;
+}
+
+.heatmap__day-labels {
+  @apply shrink-0 self-end flex flex-col items-end gap-(--cell-gap);
+}
+.heatmap__day-label {
+  @apply h-(--cell-size) leading-(--cell-size) text-xs text-(--aj-color-muted) text-right;
+}
+
 .heatmap__scroll {
   @apply overflow-x-auto overflow-y-visible;
 }
 
-.heatmap__inner {
-  @apply inline-flex flex-col gap-1;
+.heatmap__rows {
+  @apply flex flex-col gap-1;
 }
 
 .heatmap__months {
-  @apply self-end flex gap-(--cell-gap);
+  @apply flex gap-(--cell-gap);
 }
 .heatmap__month-cell {
   @apply shrink-0 relative h-4 w-(--cell-size);
 }
 .heatmap__month-label {
   @apply absolute left-0 bottom-0 leading-4 text-xs text-(--aj-color-muted) whitespace-nowrap;
-}
-
-.heatmap__body {
-  @apply flex gap-1;
-}
-.heatmap__day-labels {
-  @apply shrink-0 flex flex-col items-start gap-(--cell-gap);
-}
-.heatmap__day-label {
-  @apply h-(--cell-size) leading-(--cell-size) text-xs text-(--aj-color-muted) text-right;
 }
 
 .heatmap__weeks {

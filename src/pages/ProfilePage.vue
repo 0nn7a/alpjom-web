@@ -1,71 +1,75 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import type { HeatmapCell, HeatmapRecord } from '@/types/heatmap.ts';
+import { useRoute, useRouter } from 'vue-router';
+import type { HeatmapCell } from '@/types/heatmap.ts';
 import HeatMap from '@/components/HeatMap.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useAuthStore } from '@/stores/auth.ts';
+import { useToastStore } from '@/stores/toast.ts';
 import { useTooltipStore } from '@/stores/tooltip.ts';
-import { commonService } from '@/services/common.ts';
+import { profileService } from '@/services/profile.ts';
+import { cloudService } from '@/services/cloud.ts';
 import { CheckBadgeIcon, PencilSquareIcon } from '@heroicons/vue/24/outline';
 import ToolTip from '@/components/ToolTip.vue';
 import DiaLog from '@/components/DiaLog.vue';
+import { useProfileStore } from '@/stores/profile.ts';
 
 const route = useRoute();
+const router = useRouter();
+
 const authStore = useAuthStore();
+const toastStore = useToastStore();
+const profileStore = useProfileStore();
 const tooltipStore = useTooltipStore();
 
-const profileUsername = computed(() => route.params.username as string);
+// 當前查找用戶及是否有修改權限
+const pathUsername = computed(() => route.params.username as string);
 const isSameUser = computed(
-  () => profileUsername.value === authStore.user?.username
-);
-watch(
-  isSameUser,
-  (val) => {
-    console.log('isSameUser: ', val);
-  },
-  { immediate: true }
+  () => pathUsername.value === authStore.user?.username
 );
 
-const isDailyDone = Math.round(Math.random());
-
+// 上傳圖片
 const handleUpload = async (e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0];
   if (!file) return;
 
-  const res = await commonService.upload(file);
+  const res = await cloudService.upload(file);
   console.log('上傳成功，URL:', res.data);
 };
 
-// ── DiaLog ───────────────────────────────────────────────────────────────────
+// DiaLog
 const dialogAvatarShow = ref(false);
 const dialogEditShow = ref(false);
 
-// ── HeatMap 用戶打卡紀錄 ───────────────────────────────────────────────────────
-const mockHeatmap: HeatmapRecord[] = [
-  { date: '2025-08-08', count: 3 },
-  { date: '2025-08-12', count: 7 },
-  { date: '2025-09-10', count: 1 },
-  { date: '2025-09-11', count: 12 },
-  { date: '2025-09-15', count: 5 }
-];
-
+// HeatMap
 function handleDayClick(cell: HeatmapCell) {
   console.log('點擊日期', cell.date, '完成', cell.count, '局');
 }
 
-// ── Tooltip 內容格式化 ─────────────────────────────────────────────────────────
+// Tooltip 內容格式化
 function formatDate(content: unknown): string {
   const { date } = content as HeatmapCell;
   const [y, m, d] = date.split('-');
   return `${y} 年 ${parseInt(m)} 月 ${parseInt(d)} 日`;
 }
-
 function formatCount(content: unknown): string {
   const { count, isFuture } = content as HeatmapCell;
   if (isFuture) return '—';
   return count === 0 ? '無完成紀錄' : `完成 ${count} 局`;
 }
+
+// 查找用戶變化時重新取得資料
+watch(
+  pathUsername,
+  async (val) => {
+    try {
+      await profileStore.initProfile(val);
+    } catch (err) {
+      await router.push({ name: 'home' });
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -92,7 +96,7 @@ function formatCount(content: unknown): string {
           </template>
           <img
             class="h-full w-full object-cover"
-            src="https://pub-bf0bdbb9cd5b445db961a77785d77f93.r2.dev/Default/profile-avatar.png"
+            :src="profileStore.avatar"
             alt="profile avatar"
           />
         </div>
@@ -101,10 +105,10 @@ function formatCount(content: unknown): string {
           <p
             class="text-xl before:content-['@'] before:inline-block before:text-(--aj-color-subtle) before:font-light before:-translate-y-px"
           >
-            {{ profileUsername }}
+            {{ pathUsername }}
           </p>
           <CheckBadgeIcon
-            v-if="isDailyDone"
+            v-if="profileStore.isDailyDone"
             class="h-5 aspect-square"
             @mouseenter="tooltipStore.show($event, '已完成任意今日謎題✨')"
             @mouseleave="tooltipStore.hide"
@@ -119,21 +123,21 @@ function formatCount(content: unknown): string {
         <div class="mt-2 w-full flex justify-between">
           <div class="flex flex-col">
             <p class="text-xs text-(--aj-color-subtle)">遊玩次數</p>
-            <p>137</p>
+            <p>{{ profileStore.totalDone }}</p>
           </div>
 
           <span class="divide-vertical" />
 
           <div class="flex flex-col">
             <p class="text-xs text-(--aj-color-subtle)">擁有成就</p>
-            <p>10</p>
+            <p>{{ profileStore.totalAchievements }}</p>
           </div>
 
           <span class="divide-vertical" />
 
           <div class="flex flex-col">
             <p class="text-xs text-(--aj-color-subtle)">加入時間</p>
-            <p>2026-06-10</p>
+            <p>{{ profileStore.joinTime }}</p>
           </div>
         </div>
       </div>
@@ -143,7 +147,7 @@ function formatCount(content: unknown): string {
       <section class="grow flex flex-col overflow-x-hidden overflow-y-auto">
         <p class="mb-4 text-sm">簽到打卡</p>
         <HeatMap
-          :records="mockHeatmap"
+          :records="profileStore.heatmap"
           :show-stats="true"
           @day-click="handleDayClick"
         />

@@ -18,6 +18,9 @@ export const API = {
     }
   },
   UPLOAD: '/upload'
+  PROFILE: {
+    BASE: '/profile'
+  }
 };
 
 // cookie, token
