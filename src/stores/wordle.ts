@@ -60,7 +60,7 @@ export const useWordleStore = defineStore('wordle', () => {
     return wrongKeys.size ? [{ keys: wrongKeys, className: 'dimmed' }] : [];
   });
 
-  // Methods
+  // Actions
   function checkData() {
     console.log('gameId: ', gameId.value);
     console.log('mode: ', mode.value);
@@ -188,7 +188,6 @@ export const useWordleStore = defineStore('wordle', () => {
     guesses,
     isGameOver,
     keyDecorations,
-    checkData,
     start,
     guess,
     game,

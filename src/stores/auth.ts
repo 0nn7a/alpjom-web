@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Getters
 
-  // Methods
+  // Actions
   function initUser() {
     const u = localStorage.getItem(USER_KEY);
     if (u) {

@@ -17,7 +17,9 @@ export const API = {
       PRACTICE: '/wordle/before/practice'
     }
   },
-  UPLOAD: '/upload'
+  CLOUD: {
+    UPLOAD: '/upload'
+  },
   PROFILE: {
     BASE: '/profile'
   }
