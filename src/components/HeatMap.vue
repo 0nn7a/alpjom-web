@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useTooltipStore } from '@/stores/tooltip';
 import type { HeatmapRecord, HeatmapCell, HeatmapLevel } from '@/types/heatmap';
+import { TaiwanDateStr } from '@/utils/common.ts';
 
 const tooltipStore = useTooltipStore();
 
@@ -29,8 +30,7 @@ const emit = defineEmits<{
 const totalWeeks = 53;
 
 /** 結束日：今天 */
-const today = new Date();
-const todayStr = localDateStr(today);
+const today = TaiwanDateStr(new Date());
 
 /** 開始日：往前推 52 週，再對齊到當週週日 */
 const startDate = (() => {
@@ -62,8 +62,8 @@ const weeks = computed<HeatmapCell[][]>(() => {
     const week: HeatmapCell[] = [];
     for (let d = 0; d < 7; d++) {
       // 用本地日期字串比較，避免 toISOString() 的 UTC 時區偏移問題
-      const dateStr = localDateStr(cursor);
-      const isFuture = dateStr > todayStr;
+      const dateStr = TaiwanDateStr(cursor);
+      const isFuture = dateStr > today;
       const count = isFuture ? 0 : (recordMap.value.get(dateStr) ?? 0);
       week.push({
         date: dateStr,
@@ -157,20 +157,6 @@ function toLevel(count: number): HeatmapLevel {
   if (count <= 4) return 2;
   if (count <= 7) return 3;
   return 4;
-}
-
-/**
- * 取得本地時間的日期字串（YYYY-MM-DD）。
- *
- * 刻意不用 toISOString()，因為它輸出 UTC 時間。
- * 在 UTC+8 環境下，本地今天 00:00 的 Date 物件
- * 轉出來會是「昨天 16:00 UTC」，造成今天被誤判為未來。
- */
-function localDateStr(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }
 
 // ─── 格線顏色 class ───────────────────────────────────────────────────────────

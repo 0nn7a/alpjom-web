@@ -10,3 +10,15 @@ export function toRoutePath(value: string | string[]): string {
 export function isRoutedPath(value: string | string[]) {
   return !/[A-Z]/.test(value as string);
 }
+
+// 將日期物件轉換為台灣時區且為 YYYY-MM-DD 格式字串
+export function TaiwanDateStr(date: Date) {
+  return date
+    .toLocaleDateString('zh-TW', {
+      timeZone: 'Asia/Taipei',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
+    .replace(/\//g, '-'); // 轉成 YYYY-MM-DD 格式
+}
