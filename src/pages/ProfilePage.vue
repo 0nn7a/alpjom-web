@@ -5,9 +5,7 @@ import type { HeatmapCell } from '@/types/heatmap.ts';
 import HeatMap from '@/components/HeatMap.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useAuthStore } from '@/stores/auth.ts';
-import { useToastStore } from '@/stores/toast.ts';
 import { useTooltipStore } from '@/stores/tooltip.ts';
-import { profileService } from '@/services/profile.ts';
 import { cloudService } from '@/services/cloud.ts';
 import { CheckBadgeIcon, PencilSquareIcon } from '@heroicons/vue/24/outline';
 import ToolTip from '@/components/ToolTip.vue';
@@ -18,7 +16,6 @@ const route = useRoute();
 const router = useRouter();
 
 const authStore = useAuthStore();
-const toastStore = useToastStore();
 const profileStore = useProfileStore();
 const tooltipStore = useTooltipStore();
 
