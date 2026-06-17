@@ -99,6 +99,13 @@ async function requestWithRetry<T>(
   }
 }
 
+function withBody<T>(method: string, path: string, body?: unknown) {
+  return requestWithRetry<T>(path, {
+    method,
+    body: body !== undefined ? JSON.stringify(body) : undefined
+  });
+}
+
 export const api = {
   get: <T>(
     path: string,
@@ -112,11 +119,11 @@ export const api = {
       : '';
     return requestWithRetry<T>(path + query);
   },
-  post: <T>(path: string, body: unknown) =>
-    requestWithRetry<T>(path, { method: 'POST', body: JSON.stringify(body) }),
-  put: <T>(path: string, body: unknown) =>
-    requestWithRetry<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
-  delete: <T>(path: string) => requestWithRetry<T>(path, { method: 'DELETE' }),
+  post: <T>(path: string, body?: unknown) => withBody<T>('POST', path, body),
+  put: <T>(path: string, body?: unknown) => withBody<T>('PUT', path, body),
+  patch: <T>(path: string, body?: unknown) => withBody<T>('PATCH', path, body),
+  delete: <T>(path: string, body?: unknown) =>
+    withBody<T>('DELETE', path, body),
   upload: <T>(path: string, formData: FormData) =>
     requestWithRetry<T>(path, { method: 'POST', body: formData })
 };

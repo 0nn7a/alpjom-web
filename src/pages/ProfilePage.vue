@@ -6,11 +6,19 @@ import HeatMap from '@/components/HeatMap.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useAuthStore } from '@/stores/auth.ts';
 import { useTooltipStore } from '@/stores/tooltip.ts';
-import { cloudService } from '@/services/cloud.ts';
-import { CheckBadgeIcon, PencilSquareIcon } from '@heroicons/vue/24/outline';
+import {
+  CheckBadgeIcon,
+  PencilSquareIcon,
+  CheckIcon,
+  PlusIcon
+} from '@heroicons/vue/24/outline';
 import ToolTip from '@/components/ToolTip.vue';
 import DiaLog from '@/components/DiaLog.vue';
 import { useProfileStore } from '@/stores/profile.ts';
+import { ApiError } from '@/types/common.ts';
+import { useToastStore } from '@/stores/toast.ts';
+import FormInput from '@/components/FormInput.vue';
+import { useFormValidation } from '@/composables/useFormValidation.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -18,6 +26,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const profileStore = useProfileStore();
 const tooltipStore = useTooltipStore();
+const toastStore = useToastStore();
 
 // 當前查找用戶及是否有修改權限
 const pathUsername = computed(() => route.params.username as string);
@@ -25,18 +34,28 @@ const isSameUser = computed(
   () => pathUsername.value === authStore.user?.username
 );
 
-// 上傳圖片
-const handleUpload = async (e: Event) => {
-  const file = (e.target as HTMLInputElement).files?.[0];
-  if (!file) return;
-
-  const res = await cloudService.upload(file);
-  console.log('上傳成功，URL:', res.data);
-};
-
 // DiaLog
 const dialogAvatarShow = ref(false);
+watch(dialogAvatarShow, async (val) => {
+  if (val) await profileStore.getAvatar();
+});
+
 const dialogEditShow = ref(false);
+watch(dialogEditShow, async (val) => {
+  if (!val) {
+    submitAttempted.value = false;
+    profileStore.resetForm();
+  }
+});
+
+const { requires, errors, submitAttempted, handleSubmit } = useFormValidation(
+  profileStore.form,
+  profileStore.fieldRules
+);
+const submit = (close: () => void) =>
+  handleSubmit(async () => {
+    await profileStore.updateForm(close);
+  });
 
 // HeatMap
 function handleDayClick(cell: HeatmapCell) {
@@ -60,8 +79,13 @@ watch(
   pathUsername,
   async (val) => {
     try {
-      await profileStore.initProfile(val);
+      profileStore.username = val;
+      await profileStore.initProfile();
     } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message + '將自動導向回首頁。', {
+          tone: 'error'
+        });
       await router.push({ name: 'home' });
     }
   },
@@ -160,30 +184,103 @@ watch(
   </DefaultLayout>
 
   <DiaLog v-model="dialogAvatarShow" title="修改頭貼">
-    <div class="flex flex-col items-start gap-2 text-(--aj-color-muted)">
-      <input
-        type="file"
-        accept="image/*"
-        name="upload-avatar"
-        id="upload-avatar"
-        class="hidden"
-        @change="handleUpload"
-      />
-      <p>——開發中——</p>
-      <p>這裡將會列出所有該用戶上傳的頭貼，可供刪除、選擇或上傳更多。</p>
+    <div class="-m-4 p-4 flex flex-col items-start text-(--aj-color-muted)">
+      <div class="avatar__grid">
+        <template v-for="a in profileStore.avatarUploaded" :key="a">
+          <input
+            :id="'avatar' + a.id"
+            name="avatars"
+            type="checkbox"
+            :value="a.id"
+            v-model="profileStore.avatarSelected"
+            class="avatar__checkbox"
+          />
+          <label :for="'avatar' + a.id" class="avatar__item">
+            <img :src="a.fileUrl" :alt="'avatar' + a.id" />
+            <span class="avatar__frame">
+              <CheckIcon class="m-auto h-5 w-5" />
+            </span>
+          </label>
+        </template>
+
+        <input
+          type="file"
+          accept="image/jpeg, image/png, image/jpg, image/gif"
+          name="upload-avatar"
+          id="upload-avatar"
+          class="hidden"
+          @change="profileStore.uploadAvatar"
+        />
+        <label for="upload-avatar" class="avatar__item">
+          <PlusIcon class="m-auto h-5 w-5" />
+        </label>
+      </div>
+
+      <p class="mt-4 text-xs text-(--aj-color-danger)">
+        *按鈕「刪除」將立即清除所有選中頭貼，請謹慎操作
+      </p>
+      <p class="mt-0.5 text-xs text-(--aj-color-muted)">
+        *使用中的頭貼被刪除時，將自動套用預設頭貼
+      </p>
     </div>
-    <template #footer>
-      <button type="button" class="btn-primary">確認</button>
+
+    <template #footer="{ close }">
+      <button
+        type="button"
+        :class="profileStore.avatarCanDelete ? 'btn-danger' : 'btn-disabled'"
+        :disabled="!profileStore.avatarCanDelete"
+        @click="profileStore.deleteAvatar"
+      >
+        刪除
+      </button>
+      <button
+        type="button"
+        :class="profileStore.avatarCanUpdate ? 'btn-success' : 'btn-disabled'"
+        :disabled="!profileStore.avatarCanUpdate"
+        @click="profileStore.updateAvatar(close)"
+      >
+        確認
+      </button>
     </template>
   </DiaLog>
 
   <DiaLog v-model="dialogEditShow" title="修改使用者資料">
-    <div class="flex flex-col items-start gap-2 text-(--aj-color-muted)">
-      <p>——開發中——</p>
-      <p>這裡將會提供修改用戶名、密碼的功能。</p>
-    </div>
-    <template #footer>
-      <button type="button" class="btn-primary">確認</button>
+    <form class="flex flex-col text-(--aj-color-muted)">
+      <FormInput
+        title="Username"
+        :placeholder="pathUsername"
+        v-model="profileStore.form.username"
+        :error="errors.username"
+        :showError="submitAttempted"
+        :required="requires.username"
+      />
+      <FormInput
+        title="Old Password"
+        placeholder="舊密碼（修改密碼時必填）"
+        v-model="profileStore.form.passwordOld"
+        :error="errors.passwordOld"
+        :showError="submitAttempted"
+        :required="requires.passwordOld"
+        lblClass="mt-3"
+      />
+      <FormInput
+        title="New Password"
+        placeholder="功能開發中"
+        v-model="profileStore.form.password"
+        :error="errors.password"
+        :showError="submitAttempted"
+        :required="requires.password"
+        lblClass="mt-3"
+      />
+    </form>
+    <p class="mt-4 text-xs text-(--aj-color-danger)">
+      *修改使用者資料後將自動登出
+    </p>
+
+    <template #footer="{ close }">
+      <button type="button" class="btn-primary" @click="submit(close)">
+        送出
+      </button>
     </template>
   </DiaLog>
 
@@ -202,4 +299,31 @@ watch(
   </ToolTip>
 </template>
 
-<style scoped></style>
+<style scoped>
+@reference '@/assets/styles/style.css';
+
+.avatar__grid {
+  @apply w-full grid grid-cols-5 gap-2 select-none;
+}
+.avatar__checkbox {
+  @apply hidden;
+
+  &:checked + .avatar__item {
+    @apply border-(--aj-color-border-active) ring-2 ring-(--aj-color-ring);
+
+    .avatar__frame {
+      @apply opacity-100;
+    }
+  }
+}
+.avatar__item {
+  @apply relative flex bg-(--aj-color-surface) border border-transparent aspect-square rounded-md overflow-hidden cursor-pointer transition-all duration-300 ease-in-out hover:bg-(--aj-color-surface-hover) hover:border-(--aj-color-border);
+
+  img {
+    @apply h-full w-full object-cover;
+  }
+}
+.avatar__frame {
+  @apply flex absolute inset-0 text-white bg-neutral-600/50 opacity-0 transition-opacity duration-300 ease-in-out;
+}
+</style>

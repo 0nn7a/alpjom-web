@@ -17,11 +17,10 @@ export const API = {
       PRACTICE: '/wordle/before/practice'
     }
   },
-  CLOUD: {
-    UPLOAD: '/upload'
-  },
   PROFILE: {
-    BASE: '/profile'
+    BASE: '/profile',
+    UPDATE: '/profile/update',
+    AVATAR: '/profile/avatar'
   }
 };
 

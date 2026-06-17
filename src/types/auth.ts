@@ -1,4 +1,3 @@
-// 資料庫裡的完整使用者物件
 export interface User {
   id: number;
   username: string;
@@ -32,17 +31,4 @@ export interface LoginResponse {
 export interface RefreshResponse {
   token: string;
   expiredAt: number; // 對應後端的 Long
-}
-
-// 修改用戶基本資料
-export interface UpdateProfileRequest {
-  username?: string;
-  avatar?: string;
-}
-
-// 修改密碼（通常需要驗證舊密碼）
-export interface UpdatePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
 }
