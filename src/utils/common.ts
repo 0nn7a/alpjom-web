@@ -12,7 +12,7 @@ export function isRoutedPath(value: string | string[]) {
 }
 
 // 將日期物件轉換為台灣時區且為 YYYY-MM-DD 格式字串
-export function TaiwanDateStr(date: Date) {
+export function toTaiwanDateStr(date: Date) {
   return date
     .toLocaleDateString('zh-TW', {
       timeZone: 'Asia/Taipei',
