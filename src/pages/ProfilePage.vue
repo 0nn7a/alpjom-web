@@ -1,22 +1,24 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { HeatmapCell } from '@/types/heatmap.ts';
+import { ApiError } from '@/types/common.ts';
 import HeatMap from '@/components/HeatMap.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useAuthStore } from '@/stores/auth.ts';
 import { useTooltipStore } from '@/stores/tooltip.ts';
+import { useProfileStore } from '@/stores/profile.ts';
+import { useToastStore } from '@/stores/toast.ts';
 import {
   CheckBadgeIcon,
   PencilSquareIcon,
   CheckIcon,
-  PlusIcon
+  PlusIcon,
+  EyeIcon,
+  EyeSlashIcon
 } from '@heroicons/vue/24/outline';
 import ToolTip from '@/components/ToolTip.vue';
 import DiaLog from '@/components/DiaLog.vue';
-import { useProfileStore } from '@/stores/profile.ts';
-import { ApiError } from '@/types/common.ts';
-import { useToastStore } from '@/stores/toast.ts';
 import FormInput from '@/components/FormInput.vue';
 import { useFormValidation } from '@/composables/useFormValidation.ts';
 
@@ -44,9 +46,12 @@ const dialogEditShow = ref(false);
 watch(dialogEditShow, async (val) => {
   if (!val) {
     submitAttempted.value = false;
-    profileStore.resetForm();
+    profileStore.clearForm();
   }
 });
+
+const pwdHide = ref(false);
+const pwdType = computed(() => (pwdHide.value ? 'text' : 'password'));
 
 const { requires, errors, submitAttempted, handleSubmit } = useFormValidation(
   profileStore.form,
@@ -54,7 +59,26 @@ const { requires, errors, submitAttempted, handleSubmit } = useFormValidation(
 );
 const submit = (close: () => void) =>
   handleSubmit(async () => {
-    await profileStore.updateForm(close);
+    const hasUsername = !!profileStore.form.username;
+    const hasPassword = !!profileStore.form.password;
+
+    if (!hasUsername && !hasPassword) {
+      toastStore.notify('使用者資料無變更！', { tone: 'info' });
+      close();
+      return;
+    }
+
+    try {
+      if (hasUsername) await profileStore.updateForm();
+      if (hasPassword) await profileStore.updatePassword();
+
+      toastStore.notify('使用者資料已成功更新！', { tone: 'success' });
+      close();
+      await authStore.logout();
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+    }
   });
 
 // HeatMap
@@ -91,6 +115,11 @@ watch(
   },
   { immediate: true }
 );
+
+// 離開頁面時清上一位用戶資料避免殘留
+onBeforeUnmount(() => {
+  profileStore.reset();
+});
 </script>
 
 <template>
@@ -245,40 +274,60 @@ watch(
   </DiaLog>
 
   <DiaLog v-model="dialogEditShow" title="修改使用者資料">
-    <form class="flex flex-col text-(--aj-color-muted)">
-      <FormInput
-        title="Username"
-        :placeholder="pathUsername"
-        v-model="profileStore.form.username"
-        :error="errors.username"
-        :showError="submitAttempted"
-        :required="requires.username"
-      />
-      <FormInput
-        title="Old Password"
-        placeholder="舊密碼（修改密碼時必填）"
-        v-model="profileStore.form.passwordOld"
-        :error="errors.passwordOld"
-        :showError="submitAttempted"
-        :required="requires.passwordOld"
-        lblClass="mt-3"
-      />
-      <FormInput
-        title="New Password"
-        placeholder="功能開發中"
-        v-model="profileStore.form.password"
-        :error="errors.password"
-        :showError="submitAttempted"
-        :required="requires.password"
-        lblClass="mt-3"
-      />
-    </form>
-    <p class="mt-4 text-xs text-(--aj-color-danger)">
-      *修改使用者資料後將自動登出
-    </p>
+    <template #default="{ close }">
+      <form
+        id="profile-form"
+        class="flex flex-col text-(--aj-color-muted)"
+        @submit.prevent="submit(close)"
+      >
+        <FormInput
+          title="Username"
+          :placeholder="pathUsername"
+          v-model="profileStore.form.username"
+          :error="errors.username"
+          :showError="submitAttempted"
+          :required="requires.username"
+        />
+        <FormInput
+          title="Current Password"
+          :type="pwdType"
+          v-model="profileStore.form.passwordOld"
+          :error="errors.passwordOld"
+          :showError="submitAttempted"
+          :required="requires.passwordOld"
+          lblClass="mt-3"
+        />
+        <FormInput
+          title="New Password"
+          :type="pwdType"
+          v-model="profileStore.form.password"
+          :error="errors.password"
+          :showError="submitAttempted"
+          :required="requires.password"
+          lblClass="mt-3"
+        >
+          <template #right>
+            <Component
+              :is="pwdHide ? EyeIcon : EyeSlashIcon"
+              @click="pwdHide = !pwdHide"
+              class="h-5 ms-2 text-(--aj-color-border) rounded-md cursor-pointer transition duration-300 hover:text-(--aj-color-border-active)"
+            />
+          </template>
+        </FormInput>
+      </form>
+      <p class="mt-4 text-xs text-(--aj-color-danger)">
+        *成功修改使用者資料後將自動登出
+      </p>
+      <p class="mt-0.5 text-xs text-(--aj-color-muted)">
+        *舊密碼僅在修改密碼時必填
+      </p>
+      <p class="mt-0.5 text-xs text-(--aj-color-muted)">
+        *若僅輸入舊密碼未輸入新密碼，將不會修改密碼
+      </p>
+    </template>
 
-    <template #footer="{ close }">
-      <button type="button" class="btn-primary" @click="submit(close)">
+    <template #footer>
+      <button form="profile-form" type="submit" class="btn-primary">
         送出
       </button>
     </template>

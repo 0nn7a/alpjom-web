@@ -2,18 +2,13 @@ import { defineStore } from 'pinia';
 import { profileService } from '@/services/profile.ts';
 import { ApiError } from '@/types/common.ts';
 import { useToastStore } from '@/stores/toast.ts';
-import type {
-  Profile,
-  UpdateProfileRequest,
-  UserAvatar
-} from '@/types/profile.ts';
+import type { Profile, UserAvatar } from '@/types/profile.ts';
 import { computed, reactive, ref } from 'vue';
 import {
   type FieldRule,
   PasswordPattern,
   UsernamePattern
 } from '@/types/form.ts';
-import { useAuthStore } from '@/stores/auth.ts';
 
 export const useProfileStore = defineStore('profile', () => {
   // 更新表單用的靜態資料
@@ -44,7 +39,6 @@ export const useProfileStore = defineStore('profile', () => {
 
   // States
   const toastStore = useToastStore();
-  const authStore = useAuthStore();
 
   const username = ref<string>('');
   const profile = ref<Profile | null>(null);
@@ -87,18 +81,12 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
-  async function updateProfile(data: UpdateProfileRequest) {
-    try {
-      await profileService.updateProfile(data);
-    } catch (err) {
-      if (err instanceof ApiError)
-        toastStore.notify(err.message, { tone: 'error' });
-    }
-  }
-
-  async function getAvatar() {
+  function clearAvatar() {
     avatarUploaded.value = [];
     avatarSelected.value = [];
+  }
+  async function getAvatar() {
+    clearAvatar();
 
     try {
       const { data } = await profileService.getAvatar();
@@ -140,7 +128,7 @@ export const useProfileStore = defineStore('profile', () => {
       return;
     }
     try {
-      await updateProfile({ avatarId: avatarSelected.value[0] });
+      await profileService.updateUser({ avatarId: avatarSelected.value[0] });
       toastStore.notify('頭貼已成功更新！', { tone: 'success' });
       close();
 
@@ -151,26 +139,32 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
-  function resetForm() {
+  function clearForm() {
     Object.assign(form, initialForm);
   }
-  async function updateForm(close: () => void) {
-    if (!form.username) {
-      toastStore.notify('使用者資料無變更！', { tone: 'info' });
-      close();
-      return;
-    }
-
+  async function updateForm() {
     try {
-      await updateProfile({ username: form.username });
-      toastStore.notify('用戶名已成功更新！', { tone: 'success' });
-      close();
-
-      await authStore.logout();
+      await profileService.updateUser({ username: form.username });
     } catch (err) {
-      if (err instanceof ApiError)
-        toastStore.notify(err.message, { tone: 'error' });
+      throw err;
     }
+  }
+
+  async function updatePassword() {
+    try {
+      await profileService.updatePassword({
+        passwordOld: form.passwordOld,
+        password: form.password
+      });
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  function reset() {
+    clearProfile();
+    clearAvatar();
+    clearForm();
   }
 
   return {
@@ -194,12 +188,13 @@ export const useProfileStore = defineStore('profile', () => {
 
     // Actions
     initProfile,
-    updateProfile,
     getAvatar,
     uploadAvatar,
     deleteAvatar,
     updateAvatar,
-    resetForm,
-    updateForm
+    clearForm,
+    updateForm,
+    updatePassword,
+    reset
   };
 });

@@ -20,14 +20,13 @@ export interface UserAvatar {
 }
 
 // 修改用戶基本資料
-export interface UpdateProfileRequest {
+export interface UpdateUserRequest {
   username?: string;
   avatarId?: number;
 }
 
-// 修改密碼（通常需要驗證舊密碼）
+// 修改密碼
 export interface UpdatePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
+  passwordOld: string;
+  password: string;
 }

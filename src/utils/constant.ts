@@ -19,7 +19,8 @@ export const API = {
   },
   PROFILE: {
     BASE: '/profile',
-    UPDATE: '/profile/update',
+    USER: '/profile/user',
+    PASSWORD: '/profile/password',
     AVATAR: '/profile/avatar'
   }
 };

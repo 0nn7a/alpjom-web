@@ -85,7 +85,7 @@ onUnmounted(() => {
             <template v-if="$slots.default">
               <div class="shrink-0 mt-2 mb-4 h-px bg-(--aj-color-ring)" />
               <div class="grow -m-3 p-3 overflow-y-auto">
-                <slot />
+                <slot :close="close" />
               </div>
             </template>
 
