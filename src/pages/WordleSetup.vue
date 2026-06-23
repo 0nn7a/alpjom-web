@@ -3,6 +3,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import DiaLog from '@/components/DiaLog.vue';
 import DateBar from '@/components/DateBar.vue';
 import {
+  ArrowPathIcon,
   CheckBadgeIcon,
   TrophyIcon,
   LockClosedIcon
@@ -25,6 +26,9 @@ import { toTaiwanDateStr } from '@/utils/common.ts';
 const router = useRouter();
 const wordleStore = useWordleStore();
 
+// 骨架屏
+const loading = ref(false);
+
 // DateBar
 const selectedDate = ref(new Date());
 const selectedDateStr = computed(() => toTaiwanDateStr(selectedDate.value));
@@ -45,7 +49,14 @@ const selectedDateParts = computed(() => {
   };
 });
 watch(selectedDate, async () => {
-  await wordleStore.beforeDaily(selectedDateStr.value);
+  loading.value = true;
+
+  await Promise.all([
+    wordleStore.beforeDaily(selectedDateStr.value), // 真實請求 api
+    new Promise((resolve) => setTimeout(resolve, 300)) // 骨架屏最短需要存在時長
+  ]);
+
+  loading.value = false;
 });
 
 // 遊戲配置選項
@@ -178,6 +189,7 @@ const confirm = async (close: () => void) => {
   });
 };
 
+// 離開前重置資料
 onBeforeUnmount(() => {
   wordleStore.reset();
 });
@@ -185,79 +197,96 @@ onBeforeUnmount(() => {
 
 <template>
   <DefaultLayout>
-    <section class="w-full flex flex-col items-center py-3">
+    <section
+      class="w-full relative flex flex-col items-center py-3 overflow-y-auto"
+    >
+      <!-- Loading 遮罩 -->
+      <div
+        v-if="loading"
+        class="absolute inset-0 z-10 flex flex-col justify-center items-center gap-1 bg-transparent backdrop-blur-sm"
+      >
+        <ArrowPathIcon
+          class="h-8 aspect-square animate-[spin_2s_linear_infinite]"
+        />
+        <p>Loading...</p>
+      </div>
+
       <!-- 選中日期 -->
-      <p class="text-2xl text-(--aj-color-subtle) leading-0 opacity-30">
+      <p class="mt-auto text-2xl text-(--aj-color-subtle) leading-0 opacity-30">
         {{ selectedDateParts.weekday }}
       </p>
       <p class="font-semibold text-4xl">{{ selectedDateParts.day }}</p>
-      <p class="text-(--aj-color-subtle)">
+      <p class="mb-5 text-(--aj-color-subtle)">
         {{ selectedDateParts.year }}
       </p>
 
-      <!-- 中間主要滾動區 -->
-      <div
-        class="my-auto w-full pt-6 flex flex-col items-center overflow-y-auto"
+      <!-- 每日模式卡片（二擇一）：已完成｜未完成-->
+      <label
+        for="wordle-daily"
+        :class="
+          wordleStore.shareToken
+            ? 'card--daily-completed'
+            : 'card--daily-uncompleted'
+        "
       >
-        <!-- 每日模式卡片（二擇一）：已完成｜未完成-->
-        <label
-          for="wordle-daily"
-          :class="
-            wordleStore.shareToken
-              ? 'card--daily-completed'
-              : 'card--daily-uncompleted'
-          "
+        <span class="self-end flex items-center gap-0.5">
+          <Component :is="dailyConfig.icon" class="h-4.5 aspect-square" />
+          <span class="leading-none text-xl">{{ dailyConfig.label }}</span>
+        </span>
+        <span class="self-end text-xs opacity-40">
+          {{ dailyConfig.description }} →
+        </span>
+
+        <span class="mt-auto">Wordle</span>
+        <span class="leading-none text-xs opacity-40">
+          DAILY 每日 | NORMAL
+        </span>
+
+        <span
+          v-if="wordleStore.isWin"
+          class="absolute right-4 bottom-4 flex flex-col text-(--aj-color-subtle)"
         >
-          <span class="self-end flex items-center gap-0.5">
-            <Component :is="dailyConfig.icon" class="h-4.5 aspect-square" />
-            <span class="leading-none text-xl">{{ dailyConfig.label }}</span>
-          </span>
-          <span class="self-end text-xs opacity-40">
-            {{ dailyConfig.description }} →
-          </span>
+          <span class="text-xs scale-85">WIN</span>
+          <TrophyIcon class="h-6 stroke-1 aspect-square" />
+        </span>
+      </label>
+      <input
+        type="radio"
+        name="wordle config"
+        id="wordle-daily"
+        :value="dailyConfig"
+        v-model="config"
+        class="hidden"
+      />
 
-          <span class="mt-auto">Wordle</span>
-          <span class="leading-none text-xs opacity-40"> DAILY | NORMAL </span>
-
-          <span
-            v-if="wordleStore.isWin"
-            class="absolute right-4 bottom-4 flex flex-col text-(--aj-color-subtle)"
-          >
-            <span class="text-xs scale-85">WIN</span>
-            <TrophyIcon class="h-6 stroke-1 aspect-square" />
-          </span>
-        </label>
-        <input
-          type="radio"
-          name="wordle config"
-          id="wordle-daily"
-          :value="dailyConfig"
-          v-model="config"
-          class="hidden"
-        />
-
-        <!-- 練習模式卡片：三種難度 -->
-        <div
-          class="shrink-0 h-24 grid grid-cols-3 mt-3 px-6 gap-2 overflow-y-hidden"
-        >
-          <template v-for="option in practiceConfigs" :key="option.label">
-            <label :for="'wordle-practice-' + option.label" class="item-box">
-              <span>{{ option.label }}</span>
-              <small class="text-xs opacity-50">{{ option.description }}</small>
-            </label>
-            <input
-              type="radio"
-              name="wordle config"
-              :id="'wordle-practice-' + option.label"
-              :value="option"
-              v-model="config"
-              class="hidden"
-            />
-          </template>
-        </div>
+      <!-- 練習模式分隔線 -->
+      <div class="mt-5 mb-2 px-8 w-full flex items-center gap-2">
+        <span class="grow h-0 border-b border-(--aj-color-ring)" />
+        <p class="shrink-0 text-xs text-(--aj-color-muted)">練習模式</p>
+        <span class="grow h-0 border-b border-(--aj-color-ring)" />
       </div>
 
-      <button type="button" class="mt-6 btn-primary" @click="next">Next</button>
+      <!-- 練習模式卡片：三種難度 -->
+      <div class="shrink-0 h-24 grid grid-cols-3 px-6 gap-3 overflow-y-hidden">
+        <template v-for="option in practiceConfigs" :key="option.label">
+          <label :for="'wordle-practice-' + option.label" class="item-box">
+            <span>{{ option.label }}</span>
+            <small class="text-xs opacity-50">{{ option.description }}</small>
+          </label>
+          <input
+            type="radio"
+            name="wordle config"
+            :id="'wordle-practice-' + option.label"
+            :value="option"
+            v-model="config"
+            class="hidden"
+          />
+        </template>
+      </div>
+
+      <button type="button" class="mt-5 mb-auto btn-primary" @click="next">
+        Next
+      </button>
     </section>
 
     <!-- 日期選擇器 -->
@@ -356,7 +385,7 @@ onBeforeUnmount(() => {
 @reference '@/assets/styles/style';
 
 @utility card-basic {
-  @apply shrink-0 p-4 w-60 h-36 relative flex flex-col items-start border border-(--aj-color-border) rounded-lg cursor-pointer overflow-hidden select-none transition-all duration-300 ease-in-out;
+  @apply shrink-0 p-4 w-64 h-36 relative flex flex-col items-start border border-(--aj-color-border) rounded-lg cursor-pointer overflow-hidden select-none transition-all duration-300 ease-in-out;
 
   &:has(+ input[type='radio']:checked) {
     @apply border-(--aj-color-border-active) shadow-[0_0_0.5rem_var(--aj-color-border)] animate-[pulse-scale_3s_infinite];
@@ -377,17 +406,17 @@ onBeforeUnmount(() => {
   @apply -mx-2.5 h-full py-4 px-3 flex flex-col text-center text-(--aj-color-muted) bg-(--aj-color-bg) border border-(--aj-color-border)/70 shadow-md rounded cursor-pointer select-none transition-all duration-300;
 
   &:has(+ input[type='radio']:checked) {
-    @apply z-10 font-semibold text-(--aj-color-text) bg-(--aj-color-surface) border-(--aj-color-border-active) shadow-[0_0_0.5rem_var(--aj-color-border)] translate-y-3 animate-[pulse-scale_3s_infinite];
+    @apply z-3 translate-y-2.5 font-semibold text-(--aj-color-text) bg-(--aj-color-surface) border-(--aj-color-border-active) shadow-[0_0_0.5rem_var(--aj-color-border)] animate-[pulse-scale_3s_infinite];
   }
 }
 .item-box:nth-of-type(1) {
-  @apply z-2 -rotate-6 translate-y-6;
+  @apply z-2 -rotate-6 translate-y-5.5;
 }
 .item-box:nth-of-type(2) {
-  @apply z-1 rotate-0 translate-y-4;
+  @apply z-1 rotate-0 translate-y-3.5;
 }
 .item-box:nth-of-type(3) {
-  @apply z-0 rotate-6 translate-y-6;
+  @apply z-0 rotate-6 translate-y-5.5;
 }
 
 .game-item {
