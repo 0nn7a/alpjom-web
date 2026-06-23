@@ -62,8 +62,12 @@ const { requires, errors, submitAttempted, handleSubmit } = useFormValidation(
   fieldRules.value
 );
 
+const loading = ref(false);
 const submit = () =>
   handleSubmit(async () => {
+    if (loading.value) return;
+    loading.value = true;
+
     try {
       if (isLogin.value) {
         const loginRequest: LoginRequest = {
@@ -95,6 +99,8 @@ const submit = () =>
     } catch (err) {
       if (err instanceof ApiError)
         toastStore.notify(err.message, { tone: 'error' });
+    } finally {
+      loading.value = false;
     }
   });
 </script>
@@ -107,46 +113,48 @@ const submit = () =>
       class="w-full flex flex-col gap-x-4 gap-y-0.5 my-10"
       @submit.prevent="submit"
     >
-      <FormInput
-        title="Email"
-        placeholder="text@mail.com"
-        v-model="formData.email"
-        :error="errors.email"
-        :showError="submitAttempted"
-        :required="requires.email"
-      />
+      <fieldset :disabled="loading">
+        <FormInput
+          title="Email"
+          placeholder="text@mail.com"
+          v-model="formData.email"
+          :error="errors.email"
+          :showError="submitAttempted"
+          :required="requires.email"
+        />
 
-      <FormInput
-        title="Password"
-        :type="pwdType"
-        v-model="formData.password"
-        :error="errors.password"
-        :showError="submitAttempted"
-        :required="requires.password"
-        lblClass="mt-3"
-      >
-        <template #right>
-          <Component
-            :is="pwdHide ? EyeIcon : EyeSlashIcon"
-            @click="pwdHide = !pwdHide"
-            class="h-5 ms-2 text-(--aj-color-border) rounded-md cursor-pointer transition duration-300 hover:text-(--aj-color-border-active)"
-          />
-        </template>
-      </FormInput>
+        <FormInput
+          title="Password"
+          :type="pwdType"
+          v-model="formData.password"
+          :error="errors.password"
+          :showError="submitAttempted"
+          :required="requires.password"
+          lblClass="mt-3"
+        >
+          <template #right>
+            <Component
+              :is="pwdHide ? EyeIcon : EyeSlashIcon"
+              @click="pwdHide = !pwdHide"
+              class="h-5 ms-2 text-(--aj-color-border) rounded-md cursor-pointer transition duration-300 hover:text-(--aj-color-border-active)"
+            />
+          </template>
+        </FormInput>
 
-      <FormInput
-        v-if="!isLogin"
-        title="Username"
-        v-model="formData.username"
-        :error="errors.username"
-        :showError="submitAttempted"
-        :required="requires.username"
-        lblClass="mt-3"
-      >
-        <template #left>
-          <p class="text-(--aj-color-border) -translate-y-px">@</p>
-        </template>
-      </FormInput>
+        <FormInput
+          v-if="!isLogin"
+          title="Username"
+          v-model="formData.username"
+          :error="errors.username"
+          :showError="submitAttempted"
+          :required="requires.username"
+          lblClass="mt-3"
+        >
+          <template #left>
+            <p class="text-(--aj-color-border) -translate-y-px">@</p>
+          </template>
+        </FormInput>
+      </fieldset>
     </form>
 
     <button type="submit" form="auth-form" class="btn-primary">
