@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import KeyBoard from '@/components/KeyBoard.vue';
 import { useToastStore } from '@/stores/toast.ts';
@@ -68,9 +68,6 @@ onMounted(async () => {
   } catch (err) {
     await router.push({ name: 'wordle-setup' });
   }
-});
-onBeforeUnmount(() => {
-  wordleStore.reset();
 });
 </script>
 

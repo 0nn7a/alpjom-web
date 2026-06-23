@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { useTooltipStore } from '@/stores/tooltip';
 import type { HeatmapRecord, HeatmapCell, HeatmapLevel } from '@/types/heatmap';
-import { TaiwanDateStr } from '@/utils/common.ts';
+import { toTaiwanDateStr } from '@/utils/common.ts';
 
 const tooltipStore = useTooltipStore();
 
@@ -30,7 +30,7 @@ const emit = defineEmits<{
 const totalWeeks = 53;
 
 /** 結束日：今天 */
-const today = TaiwanDateStr(new Date());
+const today = toTaiwanDateStr(new Date());
 
 /** 開始日：往前推 52 週，再對齊到當週週日 */
 const startDate = (() => {
@@ -62,7 +62,7 @@ const weeks = computed<HeatmapCell[][]>(() => {
     const week: HeatmapCell[] = [];
     for (let d = 0; d < 7; d++) {
       // 用本地日期字串比較，避免 toISOString() 的 UTC 時區偏移問題
-      const dateStr = TaiwanDateStr(cursor);
+      const dateStr = toTaiwanDateStr(cursor);
       const isFuture = dateStr > today;
       const count = isFuture ? 0 : (recordMap.value.get(dateStr) ?? 0);
       week.push({

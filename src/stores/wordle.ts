@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import type { WordleGuess, LetterResult } from '@/types/wordle.ts';
+import type { WordleDifficulty, WordleMode } from '@/utils/wordle.ts';
 import { ApiError } from '@/types/common.ts';
 import { useToastStore } from '@/stores/toast.ts';
 import { wordleService } from '@/services/wordle.ts';
-import type { WordleDifficulty, WordleMode } from '@/utils/wordle.ts';
+import { toTaiwanDateStr } from '@/utils/common.ts';
 
 export const useWordleStore = defineStore('wordle', () => {
   // States
@@ -22,8 +23,6 @@ export const useWordleStore = defineStore('wordle', () => {
   const answer = ref<string | null>(null);
   const shareToken = ref<string | null>(null);
   const guesses = ref<WordleGuess[]>([]);
-
-  const tempDate = ref<string>(new Date().toISOString().slice(0, 10));
 
   // Getters
   const isGameOver = computed(
@@ -72,14 +71,14 @@ export const useWordleStore = defineStore('wordle', () => {
     console.log('guesses: ', guesses.value);
   }
 
-  async function start() {
+  async function start(date: string = toTaiwanDateStr(new Date())) {
     try {
       if (!mode.value || !difficulty.value) return;
 
       const { data } = await wordleService.start({
         mode: mode.value,
         difficulty: difficulty.value,
-        date: tempDate.value
+        date
       });
       gameId.value = data.gameId;
       maxGuesses.value = data.maxGuesses;
@@ -142,14 +141,15 @@ export const useWordleStore = defineStore('wordle', () => {
     }
   }
 
-  async function beforeDaily() {
+  async function beforeDaily(date: string = toTaiwanDateStr(new Date())) {
     try {
-      const { data } = await wordleService.beforeDaily(tempDate.value);
-      return data;
+      const { data } = await wordleService.beforeDaily(date);
+      gameId.value = data.gameId;
+      isWin.value = data.isWin;
+      shareToken.value = data.shareToken;
     } catch (err) {
       if (err instanceof ApiError)
         toastStore.notify(err.message, { tone: 'error' });
-      throw err;
     }
   }
 

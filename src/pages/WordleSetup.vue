@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import DiaLog from '@/components/DiaLog.vue';
-import { computed, ref, watch } from 'vue';
+import DateBar from '@/components/DateBar.vue';
+import {
+  CheckBadgeIcon,
+  TrophyIcon,
+  LockClosedIcon
+} from '@heroicons/vue/24/outline';
+import { type Component, computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useWordleStore } from '@/stores/wordle.ts';
 import {
@@ -14,133 +20,156 @@ import {
   type WordleMode
 } from '@/utils/wordle.ts';
 import type { WordleOngoing } from '@/types/wordle.ts';
+import { toTaiwanDateStr } from '@/utils/common.ts';
 
 const router = useRouter();
 const wordleStore = useWordleStore();
 
-const modeOptions = [
-  {
-    id: `wordle-mode-${DAILY_MODE}`,
-    value: DAILY_MODE,
-    label: DAILY_MODE,
-    description: '每日謎題'
-  },
-  {
-    id: `wordle-mode-${PRACTICE_MODE}`,
-    value: PRACTICE_MODE,
-    label: PRACTICE_MODE,
-    description: '練習'
-  }
-] as const;
+// DateBar
+const selectedDate = ref(new Date());
+const selectedDateStr = computed(() => toTaiwanDateStr(selectedDate.value));
+const selectedDateParts = computed(() => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+    timeZone: 'Asia/Taipei'
+  }).formatToParts(selectedDate.value);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
 
-const difficultyOptions = [
-  {
-    id: `wordle-difficulty-${EASY_DIFFICULTY}`,
-    value: EASY_DIFFICULTY,
-    label: EASY_DIFFICULTY,
-    description: '無限制'
-  },
-  {
-    id: `wordle-difficulty-${NORMAL_DIFFICULTY}`,
-    value: NORMAL_DIFFICULTY,
-    label: NORMAL_DIFFICULTY,
-    description: '6次機會'
-  },
-  {
-    id: `wordle-difficulty-${HARD_DIFFICULTY}`,
-    value: HARD_DIFFICULTY,
-    label: HARD_DIFFICULTY,
-    description: '3次機會'
-  }
-] as const;
-
-const mode = ref<WordleMode>(DAILY_MODE);
-const difficulty = ref<WordleDifficulty>(NORMAL_DIFFICULTY);
-const isDifficultyLocked = computed(() => mode.value === DAILY_MODE);
-watch(mode, (nextMode) => {
-  if (nextMode === DAILY_MODE) difficulty.value = NORMAL_DIFFICULTY;
+  return {
+    year: get('year'),
+    day: `${get('month')} ${get('day')}`,
+    weekday: get('weekday')
+  };
+});
+watch(selectedDate, async () => {
+  await wordleStore.beforeDaily(selectedDateStr.value);
 });
 
-const selectedGameId = ref<number | null>(null);
-const isSelected = computed(() => selectedGameId.value !== null);
+// 遊戲配置選項
+type Config = {
+  label: string;
+  description: string;
+  icon?: Component;
+  mode: WordleMode;
+  difficulty: WordleDifficulty;
+};
 
-const gameList = ref<WordleOngoing[]>([]);
-
-type DialogType =
-  | 'dailyContinue'
-  | 'dailyShare'
-  | 'practiceNew'
-  | 'practiceContinue'
-  | null;
-const dialogType = ref<DialogType>(null);
-
-const dialogShow = ref(false);
-const dialogDes = computed(
-  () => `${mode.value} 模式 + ${difficulty.value} 難度`
+// 每日模式：已完成｜未完成（二擇一顯示）
+const dailyOptions = {
+  completed: {
+    label: 'Completed',
+    description: 'To share page',
+    icon: CheckBadgeIcon,
+    mode: DAILY_MODE,
+    difficulty: NORMAL_DIFFICULTY
+  },
+  notYet: {
+    label: 'Not yet',
+    description: 'To play today game',
+    icon: LockClosedIcon,
+    mode: DAILY_MODE,
+    difficulty: NORMAL_DIFFICULTY
+  }
+} satisfies Record<string, Config>;
+const dailyConfig = computed(() =>
+  wordleStore.shareToken ? dailyOptions.completed : dailyOptions.notYet
 );
-const isDialogType = computed(() => ({
-  dailyContinue: dialogType.value === 'dailyContinue',
-  dailyShare: dialogType.value === 'dailyShare',
-  practiceNew: dialogType.value === 'practiceNew',
-  practiceContinue: dialogType.value === 'practiceContinue'
-}));
 
+// 練習模式：三種難度（全顯示）
+const practiceConfigs: Config[] = [
+  {
+    label: EASY_DIFFICULTY,
+    description: '無限制',
+    mode: PRACTICE_MODE,
+    difficulty: EASY_DIFFICULTY
+  },
+  {
+    label: NORMAL_DIFFICULTY,
+    description: '6次機會',
+    mode: PRACTICE_MODE,
+    difficulty: NORMAL_DIFFICULTY
+  },
+  {
+    label: HARD_DIFFICULTY,
+    description: '3次機會',
+    mode: PRACTICE_MODE,
+    difficulty: HARD_DIFFICULTY
+  }
+] as const;
+
+const config = ref<Config>(dailyConfig.value);
+
+// 練習模式：已存在遊戲清單
+const gameList = ref<WordleOngoing[]>([]);
+const selectedGameId = ref<number | null>(null);
+const isSelectedGame = computed(() => selectedGameId.value !== null);
+
+// 彈窗二次確認畫面
+type DialogType =
+  | 'dailyShare'
+  | 'dailyContinue'
+  | 'practiceNew'
+  | 'practiceContinue';
+const dialogType = ref<DialogType | null>(null);
+
+const dialogDes = computed(
+  () => `${config.value.mode} 模式 + ${config.value.difficulty} 難度`
+);
+const dialogShow = ref(false);
 watch(dialogShow, (val) => {
   if (!val) {
-    selectedGameId.value = null;
     gameList.value = [];
+    selectedGameId.value = null;
     dialogType.value = null;
   }
 });
 
-const startGame = async () => {
+// 開啟彈窗
+const next = async () => {
   try {
-    switch (mode.value) {
-      case DAILY_MODE:
-        const { gameId, isWin, shareToken } = await wordleStore.beforeDaily();
-        if (gameId !== null && isWin !== null) {
-          dialogType.value = 'dailyShare';
-          wordleStore.shareToken = shareToken;
-        } else {
-          dialogType.value = 'dailyContinue';
-        }
-        break;
-      case PRACTICE_MODE:
-        const list = await wordleStore.beforePractice(difficulty.value);
-        if (list.length <= 0) {
-          dialogType.value = 'practiceNew';
-        } else {
-          gameList.value = list;
-          dialogType.value = 'practiceContinue';
-        }
-        break;
+    if (config.value.mode === DAILY_MODE) {
+      dialogType.value = wordleStore.shareToken
+        ? 'dailyShare'
+        : 'dailyContinue';
+    } else {
+      const list = await wordleStore.beforePractice(config.value.difficulty);
+      if (list.length <= 0) {
+        dialogType.value = 'practiceNew';
+      } else {
+        gameList.value = list;
+        dialogType.value = 'practiceContinue';
+      }
     }
     dialogShow.value = true;
   } catch (err) {}
 };
 
-const confirm = async (
-  close: () => void,
-  isPracticeContinue: boolean = false
-) => {
+// 操作彈窗
+const confirm = async (close: () => void) => {
   close();
 
   // 每日謎題已完成，是否導向分享頁
-  if (isDialogType.value.dailyShare) {
+  if (dialogType.value === 'dailyShare') {
     return router.push({
       name: 'wordle-share',
       params: { shareToken: wordleStore.shareToken }
     });
   }
   // 繼續進行選中的練習謎題
-  else if (isDialogType.value.practiceContinue && isPracticeContinue) {
+  else if (
+    dialogType.value === 'practiceContinue' &&
+    selectedGameId.value !== null
+  ) {
     wordleStore.gameId = selectedGameId.value;
   }
   // 其他：新練習謎題、新每日謎題、繼續每日謎題
   else {
-    wordleStore.mode = mode.value;
-    wordleStore.difficulty = difficulty.value;
-    await wordleStore.start();
+    wordleStore.mode = config.value.mode;
+    wordleStore.difficulty = config.value.difficulty;
+    await wordleStore.start(selectedDateStr.value);
   }
 
   await router.push({
@@ -148,82 +177,110 @@ const confirm = async (
     params: { gameId: wordleStore.gameId }
   });
 };
+
+onBeforeUnmount(() => {
+  wordleStore.reset();
+});
 </script>
 
 <template>
   <DefaultLayout>
-    <section class="m-auto flex flex-col items-center text-(--aj-color-text)">
-      <p class="text-2xl text-(--aj-color-subtle) leading-0 opacity-20">Mode</p>
-      <p class="text-lg">模式</p>
-
-      <div class="mt-3 grid grid-cols-2 gap-2">
-        <template v-for="option in modeOptions" :key="option.id">
-          <label :for="option.id" class="item-box">
-            <span>{{ option.label }}</span>
-            <small class="text-xs opacity-50">{{ option.description }}</small>
-          </label>
-          <input
-            type="radio"
-            name="wordle-mode"
-            :id="option.id"
-            :value="option.value"
-            v-model="mode"
-            class="hidden"
-          />
-        </template>
-      </div>
-
-      <p class="mt-3 mb-14 text-xs text-(--aj-color-subtle)">
-        *每日謎題(DAILY)模式僅提供經典難度(NORMAL)
+    <section class="w-full flex flex-col items-center py-3">
+      <!-- 選中日期 -->
+      <p class="text-2xl text-(--aj-color-subtle) leading-0 opacity-30">
+        {{ selectedDateParts.weekday }}
+      </p>
+      <p class="font-semibold text-4xl">{{ selectedDateParts.day }}</p>
+      <p class="text-(--aj-color-subtle)">
+        {{ selectedDateParts.year }}
       </p>
 
-      <p class="text-2xl text-(--aj-color-subtle) leading-0 opacity-20">
-        Difficulty
-      </p>
-      <p class="text-lg">難易度</p>
+      <!-- 中間主要滾動區 -->
+      <div
+        class="my-auto w-full pt-6 flex flex-col items-center overflow-y-auto"
+      >
+        <!-- 每日模式卡片（二擇一）：已完成｜未完成-->
+        <label
+          for="wordle-daily"
+          :class="
+            wordleStore.shareToken
+              ? 'card--daily-completed'
+              : 'card--daily-uncompleted'
+          "
+        >
+          <span class="self-end flex items-center gap-0.5">
+            <Component :is="dailyConfig.icon" class="h-4.5 aspect-square" />
+            <span class="leading-none text-xl">{{ dailyConfig.label }}</span>
+          </span>
+          <span class="self-end text-xs opacity-40">
+            {{ dailyConfig.description }} →
+          </span>
 
-      <div class="mt-3 mb-10 grid grid-cols-3 gap-2">
-        <template v-for="option in difficultyOptions" :key="option.id">
-          <label
-            :for="option.id"
-            class="item-box"
-            :class="{ disabled: isDifficultyLocked }"
+          <span class="mt-auto">Wordle</span>
+          <span class="leading-none text-xs opacity-40"> DAILY | NORMAL </span>
+
+          <span
+            v-if="wordleStore.isWin"
+            class="absolute right-4 bottom-4 flex flex-col text-(--aj-color-subtle)"
           >
-            <span>{{ option.label }}</span>
-            <small class="text-xs opacity-50">{{ option.description }}</small>
-          </label>
-          <input
-            type="radio"
-            name="wordle-difficulty"
-            :id="option.id"
-            :value="option.value"
-            v-model="difficulty"
-            :disabled="isDifficultyLocked"
-            class="hidden"
-          />
-        </template>
+            <span class="text-xs scale-85">WIN</span>
+            <TrophyIcon class="h-6 stroke-1 aspect-square" />
+          </span>
+        </label>
+        <input
+          type="radio"
+          name="wordle config"
+          id="wordle-daily"
+          :value="dailyConfig"
+          v-model="config"
+          class="hidden"
+        />
+
+        <!-- 練習模式卡片：三種難度 -->
+        <div
+          class="shrink-0 h-24 grid grid-cols-3 mt-3 px-6 gap-2 overflow-y-hidden"
+        >
+          <template v-for="option in practiceConfigs" :key="option.label">
+            <label :for="'wordle-practice-' + option.label" class="item-box">
+              <span>{{ option.label }}</span>
+              <small class="text-xs opacity-50">{{ option.description }}</small>
+            </label>
+            <input
+              type="radio"
+              name="wordle config"
+              :id="'wordle-practice-' + option.label"
+              :value="option"
+              v-model="config"
+              class="hidden"
+            />
+          </template>
+        </div>
       </div>
 
-      <button type="button" class="mt-6 btn-primary" @click="startGame">
-        Start!
-      </button>
+      <button type="button" class="mt-6 btn-primary" @click="next">Next</button>
     </section>
+
+    <!-- 日期選擇器 -->
+    <template #footer>
+      <DateBar v-model="selectedDate" />
+    </template>
   </DefaultLayout>
 
   <DiaLog v-model="dialogShow" title="提示" :description="dialogDes">
     <!-- DAILY 謎題已完成 -->
-    <p v-if="isDialogType.dailyShare">
+    <p v-if="dialogType === 'dailyShare'">
       當日謎題已完成，無法二次挑戰，是否跳轉至結果分享頁？
     </p>
 
     <!-- DAILY 謎題新建或繼續 -->
-    <p v-else-if="isDialogType.dailyContinue">
+    <p v-else-if="dialogType === 'dailyContinue'">
       每日僅能挑戰一次 DAILY 謎題，若已有進行中的當日謎題，將自動繼續該局遊戲。
     </p>
 
     <!-- PRACTICE 謎題新建 -->
-    <p v-else-if="isDialogType.practiceNew">
-      即將新開啟一局難度為 {{ difficulty }} 的隨機 {{ mode }} 謎題。
+    <p v-else-if="dialogType === 'practiceNew'">
+      即將新開啟一局難度為 {{ config.difficulty }} 的隨機
+      {{ config.mode }} 謎題。
     </p>
 
     <!-- PRACTICE 謎題新建或繼續 -->
@@ -264,7 +321,7 @@ const confirm = async (
     </div>
 
     <template #footer="{ close }">
-      <template v-if="isDialogType.practiceContinue">
+      <template v-if="dialogType === 'practiceContinue'">
         <button
           type="button"
           class="btn-danger dialog-btn"
@@ -275,9 +332,9 @@ const confirm = async (
         <button
           type="button"
           class="dialog-btn"
-          :class="!isSelected ? ['btn-disabled'] : 'btn-success'"
-          :disabled="!isSelected"
-          @click="confirm(close, true)"
+          :class="!isSelectedGame ? ['btn-disabled'] : 'btn-success'"
+          :disabled="!isSelectedGame"
+          @click="confirm(close)"
         >
           繼續遊戲
         </button>
@@ -298,17 +355,39 @@ const confirm = async (
 <style scoped>
 @reference '@/assets/styles/style';
 
+@utility card-basic {
+  @apply shrink-0 p-4 w-60 h-36 relative flex flex-col items-start border border-(--aj-color-border) rounded-lg cursor-pointer overflow-hidden select-none transition-all duration-300 ease-in-out;
+
+  &:has(+ input[type='radio']:checked) {
+    @apply border-(--aj-color-border-active) shadow-[0_0_0.5rem_var(--aj-color-border)] animate-[pulse-scale_3s_infinite];
+  }
+}
+.card--daily-completed {
+  @apply card-basic text-(--aj-color-text) bg-radial-[at_50%_75%] via-(--aj-color-bg) to-(--aj-color-surface-hover);
+}
+.card--daily-uncompleted {
+  @apply card-basic text-(--aj-color-muted) border-dashed;
+
+  &:has(+ input[type='radio']:checked) {
+    @apply text-(--aj-color-text);
+  }
+}
+
 .item-box {
-  @apply py-5 px-3.5 flex flex-col text-center text-(--aj-color-muted) bg-(--aj-color-surface) border border-transparent ring-2 ring-transparent rounded cursor-pointer select-none transition-all duration-300;
+  @apply -mx-2.5 h-full py-4 px-3 flex flex-col text-center text-(--aj-color-muted) bg-(--aj-color-bg) border border-(--aj-color-border)/70 shadow-md rounded cursor-pointer select-none transition-all duration-300;
+
+  &:has(+ input[type='radio']:checked) {
+    @apply z-10 font-semibold text-(--aj-color-text) bg-(--aj-color-surface) border-(--aj-color-border-active) shadow-[0_0_0.5rem_var(--aj-color-border)] translate-y-3 animate-[pulse-scale_3s_infinite];
+  }
 }
-.item-box:not(.disabled):hover {
-  @apply border-(--aj-color-border);
+.item-box:nth-of-type(1) {
+  @apply z-2 -rotate-6 translate-y-6;
 }
-.item-box:has(+ input[type='radio']:checked) {
-  @apply text-(--aj-color-text) bg-(--aj-color-bg) border-(--aj-color-border-active) ring-(--aj-color-ring);
+.item-box:nth-of-type(2) {
+  @apply z-1 rotate-0 translate-y-4;
 }
-.item-box.disabled {
-  @apply text-(--aj-color-subtle) bg-(--aj-color-surface-hover) cursor-not-allowed;
+.item-box:nth-of-type(3) {
+  @apply z-0 rotate-6 translate-y-6;
 }
 
 .game-item {
