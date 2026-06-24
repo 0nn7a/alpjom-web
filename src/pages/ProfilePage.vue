@@ -15,7 +15,8 @@ import {
   CheckIcon,
   PlusIcon,
   EyeIcon,
-  EyeSlashIcon
+  EyeSlashIcon,
+  ArrowPathIcon
 } from '@heroicons/vue/24/outline';
 import ToolTip from '@/components/ToolTip.vue';
 import DiaLog from '@/components/DiaLog.vue';
@@ -36,12 +37,23 @@ const isSameUser = computed(
   () => pathUsername.value === authStore.user?.username
 );
 
-// DiaLog
+// 編輯頭貼
 const dialogAvatarShow = ref(false);
 watch(dialogAvatarShow, async (val) => {
   if (val) await profileStore.getAvatar();
 });
 
+const loading = ref(false);
+const upload = async (e: Event) => {
+  try {
+    loading.value = true;
+    await profileStore.uploadAvatar(e);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 編輯使用者基本資料
 const dialogEditShow = ref(false);
 watch(dialogEditShow, async (val) => {
   if (!val) {
@@ -232,13 +244,19 @@ onBeforeUnmount(() => {
           </label>
         </template>
 
+        <span v-if="loading" class="avatar__item">
+          <ArrowPathIcon
+            class="m-auto h-5 w-5 animate-[spin_2s_linear_infinite]"
+          />
+        </span>
+
         <input
           type="file"
           accept="image/jpeg, image/png, image/jpg, image/gif"
           name="upload-avatar"
           id="upload-avatar"
           class="hidden"
-          @change="profileStore.uploadAvatar"
+          @change="upload"
         />
         <label for="upload-avatar" class="avatar__item">
           <PlusIcon class="m-auto h-5 w-5" />
