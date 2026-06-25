@@ -77,17 +77,17 @@ const handleKeyPress = async (key: string) => {
   }
 };
 
-onMounted(async () => {
-  // 取得遊戲完整資料
-  if (!wordleStore.gameId) {
-    wordleStore.gameId = Number(route.params.gameId);
-  }
+// 取得遊戲完整資料
+async function loadGame() {
+  wordleStore.gameId = Number(route.params.gameId);
   try {
     await wordleStore.game();
   } catch (err) {
     await router.push({ name: 'wordle-setup' });
   }
-});
+}
+onMounted(loadGame);
+watch(() => route.params.gameId, loadGame);
 
 // 離開前重置資料
 onBeforeUnmount(() => {
