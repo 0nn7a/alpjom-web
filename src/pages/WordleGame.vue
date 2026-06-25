@@ -13,6 +13,8 @@ import KeyBoard from '@/components/KeyBoard.vue';
 import { useToastStore } from '@/stores/toast.ts';
 import { useWordleStore } from '@/stores/wordle.ts';
 import { toTaiwanDateParts } from '@/utils/common.ts';
+import { HandThumbUpIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline';
+import { vConfetti } from '@neoconfetti/vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -94,6 +96,26 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <!-- Confetti 遊戲結束效果 -->
+  <div
+    v-if="wordleStore.isWin"
+    v-confetti="{ particleSize: 8 }"
+    class="self-center"
+  />
+  <div
+    v-else
+    v-confetti="{
+      particleSize: 8,
+      particleCount: 30,
+      colors: [
+        'var(--aj-color-muted)',
+        'var(--aj-color-subtle)',
+        'var(--aj-color-surface)'
+      ]
+    }"
+    class="self-center"
+  />
+
   <DefaultLayout>
     <section class="w-full px-1 flex flex-col items-center overflow-y-hidden">
       <!-- 該局遊戲基本資料：日期、模式、難易度 -->
@@ -114,14 +136,20 @@ onBeforeUnmount(() => {
         v-if="wordleStore.isGameOver"
         class="w-full flex mt-2 py-2 px-2 justify-between items-center border border-(--aj-color-border) rounded-md"
       >
-        <p class="text-xs">
+        <div class="flex items-end gap-1 text-(--aj-color-muted)">
           <mark
             class="px-1.5 font-semibold text-lg tracking-widest mark-highlight"
           >
             {{ wordleStore.answer?.toUpperCase() }}
           </mark>
-          (謎底)
-        </p>
+          <Component
+            :is="wordleStore.isWin ? HandThumbUpIcon : HandThumbDownIcon"
+            class="h-3.5 aspect-square -translate-y-1"
+          />
+          <p class="text-xs -translate-y-0.5">
+            YOU {{ wordleStore.isWin ? 'WIN' : 'LOSE' }}
+          </p>
+        </div>
 
         <RouterLink
           :to="{

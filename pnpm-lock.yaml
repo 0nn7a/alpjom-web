@@ -11,6 +11,9 @@ importers:
       '@heroicons/vue':
         specifier: ^2.2.0
         version: 2.2.0(vue@3.5.34(typescript@6.0.3))
+      '@neoconfetti/vue':
+        specifier: ^2.2.1
+        version: 2.2.1
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@6.0.3)(vue@3.5.34(typescript@6.0.3))
@@ -124,6 +127,9 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
+
+  '@neoconfetti/vue@2.2.1':
+    resolution: {integrity: sha512-GXe5XoHlMK8VIxmxKuAgF9QQwRoDLmtiwVhONA9rzF+zOLGfOVLxo4OEDZqU9F0gJkB7U23BLlGJ3ouOb+kguw==}
 
   '@oxc-project/types@0.130.0':
     resolution: {integrity: sha512-ibD2usx9JRu7f5pu2tMKMI4cpA4NgXJQoYRP4pQ7Pxmn1l6k/53qWtQWZayhYy3X4QZkt90Ot+mJEaeXouio6Q==}
@@ -877,6 +883,8 @@ snapshots:
       '@emnapi/runtime': 1.10.0
       '@tybys/wasm-util': 0.10.2
     optional: true
+
+  '@neoconfetti/vue@2.2.1': {}
 
   '@oxc-project/types@0.130.0': {}
 
