@@ -102,9 +102,9 @@ export const useWordleStore = defineStore('wordle', () => {
         gameId: gameId.value,
         guessWord
       });
-      if (data.isWin) isWin.value = data.isWin;
-      if (data.answer) answer.value = data.answer;
-      if (data.shareToken) shareToken.value = data.shareToken;
+      isWin.value = data.isWin;
+      answer.value = data.answer;
+      shareToken.value = data.shareToken;
       guesses.value.push(data.guess);
 
       checkData();
