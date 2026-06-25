@@ -22,3 +22,20 @@
 @utility divide-horizontal {
   @apply h-0 w-full border-b border-(--aj-color-ring);
 }
+
+
+
+.mark-highlight {
+  @apply relative text-(--aj-color-text) bg-(--aj-highlight-yellow) mask-contain mask-no-repeat mask-center;
+  mask-image: url("@/assets/images/highlight-bg.svg");
+
+  &::before {
+    @apply absolute content-[''] inset-0 bg-(--aj-highlight-yellow) mix-blend-multiply scale-x-50 origin-right mask-contain mask-no-repeat mask-center;
+    mask-image: url("@/assets/images/highlight-pen.svg");
+  }
+}
+html[data-theme='dark'] {
+  .mark-highlight {
+    @apply after:mix-blend-normal;
+  }
+}

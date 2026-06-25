@@ -66,6 +66,12 @@
     var(--color-red-100) 80%,
     transparent
   );
+
+  --aj-highlight-yellow: color-mix(
+          in srgb,
+          var(--color-yellow-300) 50%,
+          transparent
+  );
 }
 
 html[data-theme='dark'] {
@@ -143,5 +149,11 @@ html[data-theme='dark'] {
     in srgb,
     var(--color-red-950) 60%,
     transparent
+  );
+
+  --aj-highlight-yellow: color-mix(
+          in srgb,
+          var(--color-yellow-300) 30%,
+          transparent
   );
 }
