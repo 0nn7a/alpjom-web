@@ -21,7 +21,7 @@ import {
   type WordleMode
 } from '@/utils/wordle.ts';
 import type { WordleOngoing } from '@/types/wordle.ts';
-import { toTaiwanDateStr } from '@/utils/common.ts';
+import { toTaiwanDateParts, toTaiwanDateStr } from '@/utils/common.ts';
 
 const router = useRouter();
 const wordleStore = useWordleStore();
@@ -32,22 +32,7 @@ const loading = ref(false);
 // DateBar
 const selectedDate = ref(new Date());
 const selectedDateStr = computed(() => toTaiwanDateStr(selectedDate.value));
-const selectedDateParts = computed(() => {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-    timeZone: 'Asia/Taipei'
-  }).formatToParts(selectedDate.value);
-  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
-
-  return {
-    year: get('year'),
-    day: `${get('month')} ${get('day')}`,
-    weekday: get('weekday')
-  };
-});
+const selectedDateParts = computed(() => toTaiwanDateParts(selectedDate.value));
 watch(selectedDate, async () => {
   loading.value = true;
 

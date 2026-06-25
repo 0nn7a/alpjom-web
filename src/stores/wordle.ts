@@ -20,6 +20,7 @@ export const useWordleStore = defineStore('wordle', () => {
   const difficulty = ref<WordleDifficulty | null>(null);
   const maxGuesses = ref<number | null>(null);
   const isWin = ref<boolean | null>(null);
+  const date = ref<string | null>(null);
   const answer = ref<string | null>(null);
   const shareToken = ref<string | null>(null);
   const guesses = ref<WordleGuess[]>([]);
@@ -30,6 +31,10 @@ export const useWordleStore = defineStore('wordle', () => {
       isWin.value !== null ||
       (maxGuesses.value && maxGuesses.value === guesses.value.length)
   );
+  const remainder = computed(() => {
+    if (!maxGuesses.value) return '∞';
+    return maxGuesses.value - guesses.value.length;
+  });
   const keyDecorations = computed(() => {
     const letterState = new Map<string, LetterResult>();
 
@@ -66,6 +71,7 @@ export const useWordleStore = defineStore('wordle', () => {
     console.log('difficulty: ', difficulty.value);
     console.log('maxGuesses: ', maxGuesses.value);
     console.log('isWin: ', isWin.value);
+    console.log('date: ', date.value);
     console.log('answer: ', answer.value);
     console.log('shareToken: ', shareToken.value);
     console.log('guesses: ', guesses.value);
@@ -105,6 +111,7 @@ export const useWordleStore = defineStore('wordle', () => {
     } catch (err) {
       if (err instanceof ApiError)
         toastStore.notify(err.message, { tone: 'error' });
+      throw err;
     }
   }
 
@@ -118,6 +125,7 @@ export const useWordleStore = defineStore('wordle', () => {
       difficulty.value = data.difficulty;
       maxGuesses.value = data.maxGuesses;
       isWin.value = data.isWin;
+      date.value = data.date;
       answer.value = data.answer;
       guesses.value = data.guesses;
       shareToken.value = data.shareToken;
@@ -170,6 +178,7 @@ export const useWordleStore = defineStore('wordle', () => {
     difficulty.value = null;
     maxGuesses.value = null;
     isWin.value = null;
+    date.value = null;
     answer.value = null;
     shareToken.value = null;
     guesses.value = [];
@@ -183,10 +192,12 @@ export const useWordleStore = defineStore('wordle', () => {
     difficulty,
     maxGuesses,
     isWin,
+    date,
     answer,
     shareToken,
     guesses,
     isGameOver,
+    remainder,
     keyDecorations,
     start,
     guess,

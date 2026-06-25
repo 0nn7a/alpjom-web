@@ -37,6 +37,7 @@ export interface WordleGameResponse {
   difficulty: WordleDifficulty;
   maxGuesses: number;
   isWin: boolean;
+  date: string;
   answer: string;
   shareToken: string;
   guesses: WordleGuess[]; // 該局遊戲所有猜測紀錄，依 createdAt 排序

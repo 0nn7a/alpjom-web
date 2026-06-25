@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch
+} from 'vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import KeyBoard from '@/components/KeyBoard.vue';
 import { useToastStore } from '@/stores/toast.ts';
 import { useWordleStore } from '@/stores/wordle.ts';
+import { toTaiwanDateParts } from '@/utils/common.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -16,6 +24,8 @@ const toneClasses: Record<string, string> = {
   Y: 'wordle-y',
   W: 'wordle-w'
 };
+
+const dateParts = computed(() => toTaiwanDateParts(wordleStore.date));
 
 const scrollDom = ref<HTMLElement | null>(null);
 async function scrollToBottom() {
@@ -44,8 +54,15 @@ const handleKeyPress = async (key: string) => {
         toastStore.notify('請輸入一個 5 字英文單詞！', { tone: 'warning' });
         return;
       }
-      await wordleStore.guess(inputted.value);
-      inputted.value = '';
+
+      try {
+        await wordleStore.guess(inputted.value);
+        inputted.value = '';
+
+        console.log(wordleStore.isWin);
+        console.log(wordleStore.answer);
+      } catch (err) {}
+
       break;
     case 'Backspace':
       if (inputted.value.length <= 0) return;
@@ -69,11 +86,55 @@ onMounted(async () => {
     await router.push({ name: 'wordle-setup' });
   }
 });
+
+// 離開前重置資料
+onBeforeUnmount(() => {
+  wordleStore.reset();
+});
 </script>
 
 <template>
   <DefaultLayout>
-    <section class="w-full flex flex-col items-center overflow-y-hidden">
+    <section class="w-full px-1 flex flex-col items-center overflow-y-hidden">
+      <!-- 該局遊戲基本資料：日期、模式、難易度 -->
+      <div
+        class="w-full grid grid-rows-2 grid-cols-[1fr_auto] leading-none text-end text-sm"
+      >
+        <p class="row-span-2 font-semibold text-3xl text-start">
+          {{ dateParts.day }}
+        </p>
+        <p class="self-end text-(--aj-color-muted)">
+          {{ wordleStore.mode }}
+        </p>
+        <p class="text-(--aj-color-subtle)">{{ wordleStore.difficulty }}</p>
+      </div>
+
+      <!-- 遊戲結束資料：輸贏、解答、跳轉分享按鈕 -->
+      <div
+        v-if="wordleStore.isGameOver"
+        class="w-full flex mt-2 py-2 px-2 justify-between items-center border border-(--aj-color-border) rounded-md"
+      >
+        <p class="text-xs">
+          <mark
+            class="px-1.5 font-semibold text-lg tracking-widest mark-highlight"
+          >
+            {{ wordleStore.answer }}
+          </mark>
+          (謎底)
+        </p>
+
+        <RouterLink
+          :to="{
+            name: 'wordle-share',
+            params: { shareToken: wordleStore.shareToken }
+          }"
+          class="btn-primary flex items-center text-xs"
+        >
+          前往結果分享頁 →
+        </RouterLink>
+      </div>
+
+      <!-- 已猜測單字紀錄 -->
       <div
         ref="scrollDom"
         class="grow w-full flex flex-col my-4 overflow-y-auto"
@@ -102,9 +163,10 @@ onMounted(async () => {
       </div>
 
       <p class="mx-auto my-3 text-xs text-(--aj-color-subtle)">
-        ↑ 以上紀錄猜過的詞，剩餘機會 ↑
+        ↑ 以上紀錄猜過的詞，剩餘機會：{{ wordleStore.remainder }} 次 ↑
       </p>
 
+      <!-- 當前輸入框 -->
       <div
         class="shrink-0 mt-auto w-[10ch] flex items-center py-1 px-2 text-2xl bg-(--aj-color-surface) border border-(--aj-color-border) rounded-md select-none"
       >
@@ -126,6 +188,7 @@ onMounted(async () => {
     </section>
 
     <template #footer>
+      <!-- 虛擬鍵盤 -->
       <KeyBoard
         @press="handleKeyPress"
         :keyDecorations="wordleStore.keyDecorations"
@@ -135,6 +198,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+@reference '@/assets/styles/style';
+
 .wordle-item {
   position: relative;
   color: var(--wordle-text);

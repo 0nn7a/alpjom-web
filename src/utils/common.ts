@@ -22,3 +22,25 @@ export function toTaiwanDateStr(date: Date) {
     })
     .replace(/\//g, '-'); // 轉成 YYYY-MM-DD 格式
 }
+
+// 將日期物件轉換成台灣時區且分成 year｜month DD｜weekday 段落
+export function toTaiwanDateParts(date?: Date | string | null) {
+  if (!date || typeof date === 'string') {
+    date = !date ? new Date() : new Date(date);
+  }
+
+  const parts = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+    timeZone: 'Asia/Taipei'
+  }).formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+
+  return {
+    year: get('year'),
+    day: `${get('month')} ${get('day')}`,
+    weekday: get('weekday')
+  };
+}
