@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
     class="self-center"
   />
   <div
-    v-else
+    v-else-if="wordleStore.isWin === false"
     v-confetti="{
       particleSize: 8,
       particleCount: 30,
