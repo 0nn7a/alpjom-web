@@ -118,7 +118,7 @@ onBeforeUnmount(() => {
           <mark
             class="px-1.5 font-semibold text-lg tracking-widest mark-highlight"
           >
-            {{ wordleStore.answer }}
+            {{ wordleStore.answer?.toUpperCase() }}
           </mark>
           (謎底)
         </p>
