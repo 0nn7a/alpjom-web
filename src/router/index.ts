@@ -17,12 +17,6 @@ const routes: RouteRecordRaw[] = [
         meta: { auth: true }
       },
       {
-        path: 'color',
-        name: 'color',
-        component: () => import('@/pages/ColorPage.vue'),
-        meta: { auth: false }
-      },
-      {
         path: 'profile',
         children: [
           {

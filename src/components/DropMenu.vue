@@ -42,16 +42,26 @@ const defaultSections = computed<MenuSection[]>(() => [
         label: 'Profile',
         to: { name: 'profile', params: { username: authStore.user?.username } }
       },
-      { label: 'Wordle', to: { name: 'wordle-setup' } },
-      { label: 'Color', to: { name: 'color' } }
+      { label: 'Wordle', to: { name: 'wordle-setup' } }
     ]
   },
   {
-    label: 'links',
+    label: 'Author',
     items: [
-      { label: 'GitHub', href: 'https://github.com' },
-      { label: 'Support', href: 'https://support.example.com', disabled: true },
-      { label: 'API', href: 'https://api.example.com', disabled: true }
+      { label: 'Cake', href: 'https://www.cake.me/me/0nn/portfolios' },
+      {
+        label: '104 Resume',
+        href: 'https://pda.104.com.tw/profile/share/a6cpdgDg7kSUoYTlTkzIs0y2qlLu7aWY'
+      }
+    ]
+  },
+  {
+    label: 'Contact me',
+    items: [
+      {
+        label: 'Email',
+        href: 'mailto:eueu0nn@icloud.com?subject=Message%20from%20alpJom'
+      }
     ]
   },
   {
