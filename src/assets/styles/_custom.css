@@ -39,3 +39,44 @@ html[data-theme='dark'] {
     @apply after:mix-blend-normal;
   }
 }
+
+
+
+.wordle-item {
+  position: relative;
+  color: var(--wordle-text);
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  &::before {
+    bottom: 5%;
+    height: 0.16rem;
+    aspect-ratio: 1 / 1;
+    background-color: var(--wordle-dot);
+    border-radius: 100%;
+  }
+  &::after {
+    bottom: 7%;
+    width: 70%;
+    border-bottom: 0.1rem solid var(--wordle-border);
+  }
+}
+.wordle-g {
+  --wordle-text: var(--aj-tone-success-text);
+  --wordle-dot: transparent;
+  --wordle-border: var(--aj-tone-success-text);
+}
+.wordle-y {
+  --wordle-text: var(--aj-tone-warning-text);
+  --wordle-dot: var(--aj-tone-warning-text);
+  --wordle-border: transparent;
+}
+.wordle-w {
+  --wordle-text: var(--aj-color-subtle);
+  --wordle-dot: transparent;
+  --wordle-border: transparent;
+}

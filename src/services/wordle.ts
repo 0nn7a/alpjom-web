@@ -3,6 +3,7 @@ import { api } from '@/services/api.ts';
 import { API } from '@/utils/constant.ts';
 import type {
   WordleBeforeDailyResponse,
+  WordleCommentRequest,
   WordleGameResponse,
   WordleGuessRequest,
   WordleGuessResponse,
@@ -26,6 +27,10 @@ export const wordleService = {
     api.get(`${API.WORDLE.GAME}/${gameId}`),
   share: (shareToken: string): Promise<ApiResponse<WordleShareResponse>> =>
     api.get(`${API.WORDLE.SHARE}/${shareToken}`),
+  insertComment: (data: WordleCommentRequest): Promise<ApiResponse<void>> =>
+    api.post(API.WORDLE.COMMENT, data),
+  deleteComment: (id: number): Promise<ApiResponse<void>> =>
+    api.delete(`${API.WORDLE.COMMENT}/${id}`),
   beforeDaily: (
     date: string
   ): Promise<ApiResponse<WordleBeforeDailyResponse>> =>

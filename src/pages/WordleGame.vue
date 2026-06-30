@@ -38,7 +38,6 @@ async function scrollToBottom() {
 watch(
   () => wordleStore.guesses.length,
   async () => {
-    console.log('guesses changed');
     await scrollToBottom();
   }
 );
@@ -60,9 +59,6 @@ const handleKeyPress = async (key: string) => {
       try {
         await wordleStore.guess(inputted.value);
         inputted.value = '';
-
-        console.log(wordleStore.isWin);
-        console.log(wordleStore.answer);
       } catch (err) {}
 
       break;
@@ -225,45 +221,4 @@ onBeforeUnmount(() => {
   </DefaultLayout>
 </template>
 
-<style scoped>
-@reference '@/assets/styles/style';
-
-.wordle-item {
-  position: relative;
-  color: var(--wordle-text);
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  &::before {
-    bottom: 5%;
-    height: 0.16rem;
-    aspect-ratio: 1 / 1;
-    background-color: var(--wordle-dot);
-    border-radius: 100%;
-  }
-  &::after {
-    bottom: 7%;
-    width: 70%;
-    border-bottom: 0.1rem solid var(--wordle-border);
-  }
-}
-.wordle-g {
-  --wordle-text: var(--aj-tone-success-text);
-  --wordle-dot: transparent;
-  --wordle-border: var(--aj-tone-success-text);
-}
-.wordle-y {
-  --wordle-text: var(--aj-tone-warning-text);
-  --wordle-dot: var(--aj-tone-warning-text);
-  --wordle-border: transparent;
-}
-.wordle-w {
-  --wordle-text: var(--aj-color-subtle);
-  --wordle-dot: transparent;
-  --wordle-border: transparent;
-}
-</style>
+<style scoped></style>

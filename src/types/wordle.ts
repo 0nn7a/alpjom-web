@@ -43,6 +43,19 @@ export interface WordleGameResponse {
   guesses: WordleGuess[]; // 該局遊戲所有猜測紀錄，依 createdAt 排序
 }
 
+// 分享遊戲留言區
+export interface WordleCommentRequest {
+  shareToken: string;
+  content: string;
+}
+export interface WordleComment {
+  id: number;
+  username: string;
+  avatar: string;
+  content: string;
+  createdAt: string;
+}
+
 // 分享遊戲資料
 export interface WordleShareResponse {
   username: string;
@@ -52,6 +65,7 @@ export interface WordleShareResponse {
   maxGuesses: number;
   isWin: boolean;
   guesses: WordleGuess[];
+  comments: WordleComment[];
 }
 
 // 每日模式開始前檢查

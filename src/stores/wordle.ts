@@ -149,6 +149,26 @@ export const useWordleStore = defineStore('wordle', () => {
     }
   }
 
+  async function insertComment(shareToken: string, content: string) {
+    try {
+      await wordleService.insertComment({ shareToken, content });
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+      throw err;
+    }
+  }
+
+  async function deleteComment(id: number) {
+    try {
+      await wordleService.deleteComment(id);
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+      throw err;
+    }
+  }
+
   async function beforeDaily(date: string = toTaiwanDateStr(new Date())) {
     try {
       const { data } = await wordleService.beforeDaily(date);
@@ -203,6 +223,8 @@ export const useWordleStore = defineStore('wordle', () => {
     guess,
     game,
     share,
+    insertComment,
+    deleteComment,
     beforeDaily,
     beforePractice,
     reset

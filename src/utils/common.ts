@@ -44,3 +44,20 @@ export function toTaiwanDateParts(date?: Date | string | null) {
     weekday: get('weekday')
   };
 }
+
+// 轉換成留言區時間格式
+export function formatCommentTime(createdAt: string): string {
+  const time = new Date(createdAt).getTime();
+  const now = Date.now();
+
+  const diffSeconds = Math.floor((now - time) / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMinutes < 1) return '剛剛';
+  if (diffHours < 1) return `${diffMinutes}分鐘`;
+  if (diffDays < 1) return `${diffHours}小時`;
+  if (diffDays < 7) return `${diffDays}天`;
+  return toTaiwanDateStr(new Date(time));
+}
