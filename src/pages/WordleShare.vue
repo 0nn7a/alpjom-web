@@ -77,7 +77,7 @@ const clipboard = computed(() => {
   const emojis = guesses.map((guess) => toEmoji(guess.result));
   return [
     'wordle (alpJom)',
-    `${guesses?.length}/${data.value.maxGuesses}`,
+    `${guesses?.length}/${data.value.maxGuesses || '∞'}`,
     ...emojis
   ].join('\n');
 });
@@ -100,6 +100,7 @@ async function downloadImage() {
   const rect = shareImageDom.value.getBoundingClientRect();
 
   try {
+    await document.fonts.ready; // 等字體完全載入
     const dataUrl = await toPng(shareImageDom.value, {
       pixelRatio: 2,
       skipFonts: true, // 跳過嘗試內嵌 webfont,避免 CORS 噪音
@@ -184,7 +185,7 @@ onBeforeUnmount(() => {
     >
       <article
         ref="shareImageDom"
-        class="w-full flex flex-col gap-4 bg-(--aj-color-bg)"
+        class="w-full flex flex-col gap-4 bg-(--aj-color-bg) whitespace-nowrap"
       >
         <!-- 玩家資料 -->
         <div class="flex items-center gap-2 select-none">
