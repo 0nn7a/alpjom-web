@@ -2,6 +2,7 @@
 import type { RouteLocationRaw } from 'vue-router';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth.ts';
+import { getToken } from '@/utils/jwt.ts';
 
 const authStore = useAuthStore();
 
@@ -11,7 +12,7 @@ interface MenuItem {
   href?: string;
   caption?: string;
   disabled?: boolean;
-  variant?: 'default' | 'danger';
+  variant?: 'success' | 'danger';
   action?: () => void;
 }
 
@@ -33,43 +34,60 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // 把需要 runtime 才能建立的 sections 放在 computed
-const defaultSections = computed<MenuSection[]>(() => [
-  {
-    label: 'alpJom',
-    items: [
-      { label: 'Home', to: { name: 'home' } },
-      {
-        label: 'Profile',
-        to: { name: 'profile', params: { username: authStore.user?.username } }
-      },
-      { label: 'Wordle', to: { name: 'wordle-setup' } }
-    ]
-  },
-  {
-    label: 'Author',
-    items: [
-      { label: 'Cake', href: 'https://www.cake.me/me/0nn/portfolios' },
-      {
-        label: '104 Resume',
-        href: 'https://pda.104.com.tw/profile/share/a6cpdgDg7kSUoYTlTkzIs0y2qlLu7aWY'
+const defaultSections = computed<MenuSection[]>(() => {
+  const isLoggedIn = !!getToken();
+  let item: MenuItem = isLoggedIn
+    ? {
+        label: 'Log out',
+        variant: 'danger',
+        action: () => authStore.logout()
       }
-    ]
-  },
-  {
-    label: 'Contact me',
-    items: [
-      {
-        label: 'Email',
-        href: 'mailto:eueu0nn@icloud.com?subject=Message%20from%20alpJom'
-      }
-    ]
-  },
-  {
-    items: [
-      { label: 'Log out', variant: 'danger', action: () => authStore.logout() }
-    ]
-  }
-]);
+    : {
+        label: 'Log in',
+        variant: 'success',
+        to: { name: 'login' }
+      };
+
+  return [
+    {
+      label: 'alpJom',
+      items: [
+        { label: 'Home', to: { name: 'home' } },
+        {
+          label: 'Profile',
+          to: {
+            name: 'profile',
+            params: { username: authStore.user?.username }
+          },
+          disabled: authStore.user === null
+        },
+        { label: 'Wordle', to: { name: 'wordle-setup' } }
+      ]
+    },
+    {
+      label: 'Author',
+      items: [
+        { label: 'Cake', href: 'https://www.cake.me/me/0nn/portfolios' },
+        {
+          label: '104 Resume',
+          href: 'https://pda.104.com.tw/profile/share/a6cpdgDg7kSUoYTlTkzIs0y2qlLu7aWY'
+        }
+      ]
+    },
+    {
+      label: 'Contact me',
+      items: [
+        {
+          label: 'Email',
+          href: 'mailto:eueu0nn@icloud.com?subject=Message%20from%20alpJom'
+        }
+      ]
+    },
+    {
+      items: [item]
+    }
+  ];
+});
 
 const activeSections = computed(() =>
   props.sections.length ? props.sections : defaultSections.value
@@ -104,6 +122,10 @@ function itemClass(item: MenuItem) {
     base.push('text-(--aj-color-placeholder) cursor-not-allowed!');
   } else if (item.variant === 'danger') {
     base.push('text-(--aj-color-danger) hover:bg-(--aj-color-danger-ring)');
+  } else if (item.variant === 'success') {
+    base.push(
+      'text-(--aj-tone-success-text) hover:bg-(--aj-tone-success-text)/15'
+    );
   } else {
     base.push('text-(--aj-color-text) hover:bg-(--aj-color-ring)');
   }
@@ -192,7 +214,7 @@ function itemClass(item: MenuItem) {
                 v-else-if="item.href"
                 :href="item.href"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer nofollow"
                 @click="close"
                 :class="itemClass(item)"
                 role="menuitem"
