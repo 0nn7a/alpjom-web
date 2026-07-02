@@ -21,6 +21,7 @@ import { formatCommentTime } from '@/utils/common.ts';
 import DiaLog from '@/components/DiaLog.vue';
 import { useToastStore } from '@/stores/toast.ts';
 import { useAuthStore } from '@/stores/auth.ts';
+import RollingNumber from '@/components/RollingNumber.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -262,7 +263,7 @@ onBeforeUnmount(() => {
             :is="data.like.byMe ? HeartIconSolid : HeartIcon"
             class="h-4 aspect-square"
           />
-          <span>誇誇 {{ data.like.count }}</span>
+          <span>誇誇 <RollingNumber :value="data.like.count" /></span>
         </button>
         <button type="button" class="btn-icon" @click="copyToClipboard">
           <Square2StackIcon class="h-4 aspect-square" />
