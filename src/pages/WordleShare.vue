@@ -10,11 +10,13 @@ import {
   XMarkIcon,
   CheckIcon,
   ArrowsRightLeftIcon,
+  HeartIcon,
   Square2StackIcon,
   ShareIcon,
   ChatBubbleLeftEllipsisIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/vue/24/solid';
 import { formatCommentTime } from '@/utils/common.ts';
 import DiaLog from '@/components/DiaLog.vue';
 import { useToastStore } from '@/stores/toast.ts';
@@ -56,6 +58,14 @@ const showAnswer = ref(false);
 const translateText = computed(() =>
   showAnswer.value ? '顯示原文' : '翻譯年糕'
 );
+
+// 操作區：按讚
+async function toggleLike() {
+  try {
+    const res = await wordleStore.toggleLike(shareToken.value);
+    if (data.value) data.value.like = res;
+  } catch (err) {}
+}
 
 // 操作區：複製文字版結果
 const COLOR_MAP: Record<string, string> = {
@@ -246,7 +256,14 @@ onBeforeUnmount(() => {
       </article>
 
       <!-- 分享操作區 -->
-      <div class="flex gap-8 select-none">
+      <div class="flex justify-between gap-1 select-none">
+        <button type="button" class="btn-icon" @click="toggleLike">
+          <Component
+            :is="data.like.byMe ? HeartIconSolid : HeartIcon"
+            class="h-4 aspect-square"
+          />
+          <span>誇誇 {{ data.like.count }}</span>
+        </button>
         <button type="button" class="btn-icon" @click="copyToClipboard">
           <Square2StackIcon class="h-4 aspect-square" />
           <span>複製文字版結果</span>

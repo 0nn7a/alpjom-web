@@ -7,6 +7,7 @@ import type {
   WordleGameResponse,
   WordleGuessRequest,
   WordleGuessResponse,
+  WordleLike,
   WordleOngoing,
   WordleShareResponse,
   WordleStartRequest,
@@ -27,6 +28,8 @@ export const wordleService = {
     api.get(`${API.WORDLE.GAME}/${gameId}`),
   share: (shareToken: string): Promise<ApiResponse<WordleShareResponse>> =>
     api.get(`${API.WORDLE.SHARE}/${shareToken}`),
+  toggleLike: (shareToken: string): Promise<ApiResponse<WordleLike>> =>
+    api.post(`${API.WORDLE.LIKE}/${shareToken}`),
   insertComment: (data: WordleCommentRequest): Promise<ApiResponse<void>> =>
     api.post(API.WORDLE.COMMENT, data),
   deleteComment: (id: number): Promise<ApiResponse<void>> =>

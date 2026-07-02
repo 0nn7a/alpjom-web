@@ -149,6 +149,17 @@ export const useWordleStore = defineStore('wordle', () => {
     }
   }
 
+  async function toggleLike(shareToken: string) {
+    try {
+      const { data } = await wordleService.toggleLike(shareToken);
+      return data;
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+      throw err;
+    }
+  }
+
   async function insertComment(shareToken: string, content: string) {
     try {
       await wordleService.insertComment({ shareToken, content });
@@ -223,6 +234,7 @@ export const useWordleStore = defineStore('wordle', () => {
     guess,
     game,
     share,
+    toggleLike,
     insertComment,
     deleteComment,
     beforeDaily,

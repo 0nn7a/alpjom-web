@@ -43,6 +43,12 @@ export interface WordleGameResponse {
   guesses: WordleGuess[]; // 該局遊戲所有猜測紀錄，依 createdAt 排序
 }
 
+// 分享遊戲 like 資料
+export interface WordleLike {
+  count: number;
+  byMe: boolean;
+}
+
 // 分享遊戲留言區
 export interface WordleCommentRequest {
   shareToken: string;
@@ -65,6 +71,7 @@ export interface WordleShareResponse {
   maxGuesses: number;
   isWin: boolean;
   guesses: WordleGuess[];
+  like: WordleLike;
   comments: WordleComment[];
 }
 
