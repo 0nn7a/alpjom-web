@@ -11,19 +11,18 @@ import {
   CheckIcon,
   ArrowsRightLeftIcon,
   Square2StackIcon,
-  ArrowDownTrayIcon,
   ShareIcon,
   ChatBubbleLeftEllipsisIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline';
-import { getToken } from '@/utils/jwt.ts';
 import { formatCommentTime } from '@/utils/common.ts';
 import DiaLog from '@/components/DiaLog.vue';
 import { useToastStore } from '@/stores/toast.ts';
-import { toPng } from 'html-to-image';
+import { useAuthStore } from '@/stores/auth.ts';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const wordleStore = useWordleStore();
 const toastStore = useToastStore();
 
@@ -33,7 +32,6 @@ const toneClasses: Record<string, string> = {
   W: 'wordle-w'
 };
 
-const isLoggedIn = computed(() => !!getToken());
 const shareToken = computed(() => route.params.shareToken as string);
 
 const data = ref<WordleShareResponse | null>(null);
@@ -59,7 +57,7 @@ const translateText = computed(() =>
   showAnswer.value ? '顯示原文' : '翻譯年糕'
 );
 
-// 操作區：複製文字版
+// 操作區：複製文字版結果
 const COLOR_MAP: Record<string, string> = {
   G: '🟩',
   Y: '🟨',
@@ -87,35 +85,6 @@ async function copyToClipboard() {
     toastStore.notify('成功複製文字版結果！', { tone: 'success' });
   } catch (err) {
     toastStore.notify('複製文字版結果失敗，請稍後再試！', { tone: 'error' });
-    console.error(err);
-  }
-}
-
-// 操作區：保存圖片
-const shareImageDom = ref<HTMLElement | null>(null);
-async function downloadImage() {
-  if (!shareImageDom.value) return;
-
-  const PADDING = 24; // px
-  const rect = shareImageDom.value.getBoundingClientRect();
-
-  try {
-    await document.fonts.ready; // 等字體完全載入
-    const dataUrl = await toPng(shareImageDom.value, {
-      pixelRatio: 2,
-      skipFonts: true, // 跳過嘗試內嵌 webfont,避免 CORS 噪音
-      width: rect.width + PADDING * 2,
-      height: rect.height + PADDING * 2,
-      style: {
-        padding: `${PADDING}px`
-      }
-    });
-    const link = document.createElement('a');
-    link.download = 'ajpJom-share.png';
-    link.href = dataUrl;
-    link.click();
-  } catch (err) {
-    toastStore.notify('保存產生失敗，請稍後再試！', { tone: 'error' });
     console.error(err);
   }
 }
@@ -189,12 +158,7 @@ onBeforeUnmount(() => {
       >
         <!-- 玩家資料 -->
         <div class="flex items-center gap-2 select-none">
-          <img
-            :src="data.avatar"
-            alt="player avatar"
-            class="avatar"
-            crossorigin="anonymous"
-          />
+          <img :src="data.avatar" alt="player avatar" class="avatar" />
           <RouterLink
             :to="{ name: 'profile', params: { username: data.username } }"
             class="username"
@@ -282,14 +246,10 @@ onBeforeUnmount(() => {
       </article>
 
       <!-- 分享操作區 -->
-      <div class="flex justify-between select-none">
+      <div class="flex gap-8 select-none">
         <button type="button" class="btn-icon" @click="copyToClipboard">
           <Square2StackIcon class="h-4 aspect-square" />
-          <span>複製文字版</span>
-        </button>
-        <button type="button" class="btn-icon" @click="downloadImage">
-          <ArrowDownTrayIcon class="h-4 aspect-square" />
-          <span>保存圖片</span>
+          <span>複製文字版結果</span>
         </button>
         <button type="button" class="btn-icon" @click="shareLink">
           <ShareIcon class="h-4 aspect-square" />
@@ -303,8 +263,8 @@ onBeforeUnmount(() => {
       <div class="grow flex flex-col gap-4">
         <!-- 先導向登入 -->
         <RouterLink
-          v-if="!isLoggedIn"
-          :to="{ name: 'login' }"
+          v-if="!authStore.isLoggedIn"
+          :to="{ name: 'login', query: { redirect: route.fullPath } }"
           class="m-auto btn-primary"
         >
           立即登入一起討論 →

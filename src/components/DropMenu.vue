@@ -2,7 +2,6 @@
 import type { RouteLocationRaw } from 'vue-router';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth.ts';
-import { getToken } from '@/utils/jwt.ts';
 
 const authStore = useAuthStore();
 
@@ -35,8 +34,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 // 把需要 runtime 才能建立的 sections 放在 computed
 const defaultSections = computed<MenuSection[]>(() => {
-  const isLoggedIn = !!getToken();
-  let item: MenuItem = isLoggedIn
+  let item: MenuItem = authStore.isLoggedIn
     ? {
         label: 'Log out',
         variant: 'danger',

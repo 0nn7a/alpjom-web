@@ -4,6 +4,7 @@ import { getToken } from '@/utils/jwt.ts';
 import { clearSession, refreshAccessToken } from '@/services/session';
 import { useToastStore } from '@/stores/toast.ts';
 import { ApiError } from '@/types/common.ts';
+import { useAuthStore } from '@/stores/auth.ts';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -55,16 +56,18 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/pages/AuthPage.vue')
+    component: () => import('@/pages/AuthPage.vue'),
+    meta: { auth: false }
   },
   {
     path: '/register',
     name: 'register',
-    component: () => import('@/pages/AuthPage.vue')
+    component: () => import('@/pages/AuthPage.vue'),
+    meta: { auth: false }
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: { name: 'home', params: {} }
+    redirect: { name: 'home' }
   }
 ];
 
@@ -80,13 +83,17 @@ router.beforeEach(async (to) => {
   const requiresAuth = to.matched.some((route) => route.meta.auth);
   const isAuthPage = to.name === 'login' || to.name === 'register';
   const token = getToken();
+
   const toastStore = useToastStore();
+  const authStore = useAuthStore();
 
   if (isAuthPage) {
-    if (token) return { name: 'home' };
-
     try {
-      await refreshAccessToken();
+      if (!token) await refreshAccessToken();
+
+      const redirect = to.query.redirect;
+      if (typeof redirect === 'string') return redirect;
+
       return { name: 'home' };
     } catch {
       // 切換路由引起的自動換發失敗，清除 Token 並允許前往登入註冊頁
@@ -104,7 +111,7 @@ router.beforeEach(async (to) => {
     return true;
   } catch (err) {
     // 切換路由引起的自動換發失敗，清除 Token 並導向至重新登入
-    clearSession();
+    authStore.clearAuth();
     if (err instanceof ApiError)
       toastStore.notify(err.message, { tone: 'error' });
   }

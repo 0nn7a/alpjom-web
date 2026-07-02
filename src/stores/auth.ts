@@ -1,20 +1,23 @@
 import { defineStore } from 'pinia';
 import type { LoginRequest, RegisterRequest, User } from '@/types/auth.ts';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { authService } from '@/services/auth.ts';
 import { setAllTokens } from '@/utils/jwt.ts';
 import { ApiError } from '@/types/common.ts';
 import { useToastStore } from '@/stores/toast.ts';
-import router from '@/router';
 import { USER_KEY } from '@/utils/constant.ts';
 import { clearSession } from '@/services/session.ts';
+import { useRoute, useRouter } from 'vue-router';
 
 export const useAuthStore = defineStore('auth', () => {
   // States
   const toastStore = useToastStore();
   const user = ref<User | null>(null);
+  const router = useRouter();
+  const route = useRoute();
 
   // Getters
+  const isLoggedIn = computed(() => !!user.value);
 
   // Actions
   function initUser() {
@@ -31,6 +34,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   function removeUser() {
     user.value = null;
+  }
+
+  function clearAuth() {
+    clearSession();
+    removeUser();
   }
 
   async function register(request: RegisterRequest) {
@@ -54,11 +62,10 @@ export const useAuthStore = defineStore('auth', () => {
           { tone: 'warning' }
         );
     } finally {
-      clearSession();
-      removeUser();
-      await router.push({ name: 'login' });
+      clearAuth();
+      if (route.meta.auth) await router.push({ name: 'login' });
     }
   }
 
-  return { user, initUser, register, login, logout };
+  return { user, isLoggedIn, initUser, register, login, logout, clearAuth };
 });
