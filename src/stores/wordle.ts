@@ -15,7 +15,7 @@ export const useWordleStore = defineStore('wordle', () => {
   // G / Y 的優先序高於 W，避免同一個字母在後續猜中被修正後仍顯示為錯誤鍵
   const priority: Record<LetterResult, number> = { G: 3, Y: 2, W: 1 };
 
-  const gameId = ref<number | null>(null);
+  const recordId = ref<number | null>(null);
   const mode = ref<WordleMode | null>(null);
   const difficulty = ref<WordleDifficulty | null>(null);
   const maxGuesses = ref<number | null>(null);
@@ -66,7 +66,7 @@ export const useWordleStore = defineStore('wordle', () => {
 
   // Actions
   function checkData() {
-    console.log('gameId: ', gameId.value);
+    console.log('recordId: ', recordId.value);
     console.log('mode: ', mode.value);
     console.log('difficulty: ', difficulty.value);
     console.log('maxGuesses: ', maxGuesses.value);
@@ -86,7 +86,7 @@ export const useWordleStore = defineStore('wordle', () => {
         difficulty: difficulty.value,
         date
       });
-      gameId.value = data.gameId;
+      recordId.value = data.recordId;
       maxGuesses.value = data.maxGuesses;
     } catch (err) {
       if (err instanceof ApiError)
@@ -96,10 +96,10 @@ export const useWordleStore = defineStore('wordle', () => {
 
   async function guess(guessWord: string) {
     try {
-      if (!gameId.value) return;
+      if (!recordId.value) return;
 
       const { data } = await wordleService.guess({
-        gameId: gameId.value,
+        recordId: recordId.value,
         guessWord
       });
       isWin.value = data.isWin;
@@ -117,10 +117,10 @@ export const useWordleStore = defineStore('wordle', () => {
 
   async function game() {
     try {
-      if (!gameId.value) return;
+      if (!recordId.value) return;
 
-      const { data } = await wordleService.game(gameId.value);
-      gameId.value = data.gameId;
+      const { data } = await wordleService.game(recordId.value);
+      recordId.value = data.recordId;
       mode.value = data.mode;
       difficulty.value = data.difficulty;
       maxGuesses.value = data.maxGuesses;
@@ -183,7 +183,7 @@ export const useWordleStore = defineStore('wordle', () => {
   async function beforeDaily(date: string = toTaiwanDateStr(new Date())) {
     try {
       const { data } = await wordleService.beforeDaily(date);
-      gameId.value = data.gameId;
+      recordId.value = data.recordId;
       isWin.value = data.isWin;
       shareToken.value = data.shareToken;
     } catch (err) {
@@ -204,7 +204,7 @@ export const useWordleStore = defineStore('wordle', () => {
   }
 
   function reset() {
-    gameId.value = null;
+    recordId.value = null;
     mode.value = null;
     difficulty.value = null;
     maxGuesses.value = null;
@@ -218,7 +218,7 @@ export const useWordleStore = defineStore('wordle', () => {
   }
 
   return {
-    gameId,
+    recordId,
     mode,
     difficulty,
     maxGuesses,

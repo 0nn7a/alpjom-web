@@ -75,7 +75,7 @@ const handleKeyPress = async (key: string) => {
 
 // 取得遊戲完整資料
 async function loadGame() {
-  wordleStore.gameId = Number(route.params.gameId);
+  wordleStore.recordId = Number(route.params.recordId);
   try {
     await wordleStore.game();
   } catch (err) {
@@ -83,7 +83,7 @@ async function loadGame() {
   }
 }
 onMounted(loadGame);
-watch(() => route.params.gameId, loadGame);
+watch(() => route.params.recordId, loadGame);
 
 // 離開前重置資料
 onBeforeUnmount(() => {

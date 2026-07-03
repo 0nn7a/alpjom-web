@@ -100,8 +100,8 @@ const config = ref<Config>(dailyConfig.value);
 
 // 練習模式：已存在遊戲清單
 const gameList = ref<WordleOngoing[]>([]);
-const selectedGameId = ref<number | null>(null);
-const isSelectedGame = computed(() => selectedGameId.value !== null);
+const selectedRecordId = ref<number | null>(null);
+const isSelectedGame = computed(() => selectedRecordId.value !== null);
 
 // 彈窗二次確認畫面
 type DialogType =
@@ -118,7 +118,7 @@ const dialogShow = ref(false);
 watch(dialogShow, (val) => {
   if (!val) {
     gameList.value = [];
-    selectedGameId.value = null;
+    selectedRecordId.value = null;
     dialogType.value = null;
   }
 });
@@ -157,9 +157,9 @@ const confirm = async (close: () => void) => {
   // 繼續進行選中的練習謎題
   else if (
     dialogType.value === 'practiceContinue' &&
-    selectedGameId.value !== null
+    selectedRecordId.value !== null
   ) {
-    wordleStore.gameId = selectedGameId.value;
+    wordleStore.recordId = selectedRecordId.value;
   }
   // 其他：新練習謎題、新每日謎題、繼續每日謎題
   else {
@@ -170,7 +170,7 @@ const confirm = async (close: () => void) => {
 
   await router.push({
     name: 'wordle-game',
-    params: { gameId: wordleStore.gameId }
+    params: { recordId: wordleStore.recordId }
   });
 };
 
@@ -305,12 +305,12 @@ onBeforeUnmount(() => {
           <input
             type="radio"
             name="continueGames"
-            :id="`continue${game.gameId}`"
-            :value="game.gameId"
-            v-model="selectedGameId"
+            :id="`continue${game.recordId}`"
+            :value="game.recordId"
+            v-model="selectedRecordId"
             class="peer hidden"
           />
-          <label :for="`continue${game.gameId}`" class="game-item">
+          <label :for="`continue${game.recordId}`" class="game-item">
             <span class="block text-xs text-(--aj-color-subtle)">
               已猜 / 總次數
             </span>

@@ -7,7 +7,7 @@ export interface WordleStartRequest {
   date: string; // YYYY-MM-DD
 }
 export interface WordleStartResponse {
-  gameId: number;
+  recordId: number;
   maxGuesses: number; // 0 -> 無限
 }
 
@@ -20,7 +20,7 @@ export interface WordleGuess {
 
 // 送出猜題
 export interface WordleGuessRequest {
-  gameId: number;
+  recordId: number;
   guessWord: string;
 }
 export interface WordleGuessResponse {
@@ -32,7 +32,7 @@ export interface WordleGuessResponse {
 
 // 整局遊戲資料
 export interface WordleGameResponse {
-  gameId: number;
+  recordId: number;
   mode: WordleMode;
   difficulty: WordleDifficulty;
   maxGuesses: number;
@@ -77,14 +77,14 @@ export interface WordleShareResponse {
 
 // 每日模式開始前檢查
 export interface WordleBeforeDailyResponse {
-  gameId: number;
+  recordId: number;
   isWin: boolean;
   shareToken: string;
 }
 
 // 展示進行中遊戲詳細資料
 export interface WordleOngoing {
-  gameId: number;
+  recordId: number;
   mode: WordleMode;
   difficulty: WordleDifficulty;
   maxGuesses: number;

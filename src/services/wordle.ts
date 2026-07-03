@@ -24,8 +24,8 @@ export const wordleService = {
     data: WordleGuessRequest
   ): Promise<ApiResponse<WordleGuessResponse>> =>
     api.post(API.WORDLE.GUESS, data),
-  game: (gameId: Number): Promise<ApiResponse<WordleGameResponse>> =>
-    api.get(`${API.WORDLE.GAME}/${gameId}`),
+  game: (recordId: Number): Promise<ApiResponse<WordleGameResponse>> =>
+    api.get(`${API.WORDLE.GAME}/${recordId}`),
   share: (shareToken: string): Promise<ApiResponse<WordleShareResponse>> =>
     api.get(`${API.WORDLE.SHARE}/${shareToken}`),
   toggleLike: (shareToken: string): Promise<ApiResponse<WordleLike>> =>

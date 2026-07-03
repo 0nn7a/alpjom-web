@@ -38,7 +38,7 @@ const routes: RouteRecordRaw[] = [
             meta: { auth: true }
           },
           {
-            path: 'game/:gameId',
+            path: 'game/:recordId',
             name: 'wordle-game',
             component: () => import('@/pages/WordleGame.vue'),
             meta: { auth: true }
