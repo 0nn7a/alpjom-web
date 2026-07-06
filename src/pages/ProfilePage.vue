@@ -264,7 +264,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <span class="divide-horizontal my-4"></span>
+      <span class="divide-horizontal my-4" />
 
       <section class="grow flex flex-col overflow-x-hidden overflow-y-auto">
         <p class="mb-4 text-sm">簽到打卡</p>
@@ -274,7 +274,7 @@ onBeforeUnmount(() => {
           @day-click="handleDayClick"
         />
 
-        <span class="divide-horizontal my-4"></span>
+        <span class="divide-horizontal my-4" />
 
         <p class="mb-4 text-sm">遊戲統計及分析</p>
         <div class="shrink-0 h-24 flex bg-(--aj-color-surface) rounded">

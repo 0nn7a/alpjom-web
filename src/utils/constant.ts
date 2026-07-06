@@ -26,8 +26,8 @@ export const API = {
     AVATAR: '/profile/avatar',
     FOLLOW: {
       BASE: '/profile/follow',
-      FOLLOWER: '/profile/follow/follower',
-      FOLLOWING: '/profile/follow/following'
+      FOLLOWER: '/profile/follow/list/follower',
+      FOLLOWING: '/profile/follow/list/following'
     }
   }
 };
