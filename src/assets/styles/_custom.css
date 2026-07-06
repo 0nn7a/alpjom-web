@@ -5,6 +5,9 @@
 .btn-primary {
   @apply btn-base text-(--aj-color-text) bg-(--aj-color-surface) border-(--aj-color-border) hover:border-(--aj-color-border-active);
 }
+.btn-solid {
+  @apply btn-base text-(--aj-color-bg) bg-(--aj-color-text) border-(--aj-color-text) hover:opacity-80;
+}
 .btn-danger {
   @apply btn-base text-(--aj-tone-error-text) bg-(--aj-tone-error-shadow) border-(--aj-tone-error-border) hover:border-(--aj-tone-danger-text);
 }

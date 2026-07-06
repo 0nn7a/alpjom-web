@@ -22,6 +22,7 @@ import ToolTip from '@/components/ToolTip.vue';
 import DiaLog from '@/components/DiaLog.vue';
 import FormInput from '@/components/FormInput.vue';
 import { useFormValidation } from '@/composables/useFormValidation.ts';
+import RollingNumber from '@/components/RollingNumber.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -181,6 +182,28 @@ onBeforeUnmount(() => {
             @click="dialogEditShow = true"
           />
         </div>
+
+        <div
+          class="mb-2 w-full flex items-center gap-2 text-xs text-(--aj-color-subtle)"
+        >
+          <p>
+            粉絲
+            <RollingNumber :value="profileStore.follow?.followerCount || 0" />
+          </p>
+          <p>
+            追蹤中
+            <RollingNumber :value="profileStore.follow?.followingCount || 0" />
+          </p>
+        </div>
+        <button
+          v-if="!isSameUser"
+          type="button"
+          class="mb-2 w-full text-xs"
+          :class="profileStore.follow?.following ? 'btn-primary' : 'btn-solid'"
+          @click="profileStore.toggleFollow"
+        >
+          {{ profileStore.follow?.following ? '追蹤中' : '追蹤對方' }}
+        </button>
 
         <div class="mt-2 w-full flex justify-between">
           <div class="flex flex-col">

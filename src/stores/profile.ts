@@ -55,6 +55,7 @@ export const useProfileStore = defineStore('profile', () => {
       'https://pub-bf0bdbb9cd5b445db961a77785d77f93.r2.dev/Default/profile-avatar.png'
   );
   const isDailyDone = computed(() => profile.value?.isDailyDone ?? false);
+  const follow = computed(() => profile.value?.follow);
   const totalDone = computed(() => profile.value?.totalDone ?? 0);
   const totalAchievements = computed(
     () => profile.value?.totalAchievements ?? 0
@@ -139,6 +140,18 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
+  async function toggleFollow() {
+    try {
+      const { data } = await profileService.toggleFollow(username.value);
+      if (profile.value) {
+        profile.value = { ...profile.value, follow: data };
+      }
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+    }
+  }
+
   function clearForm() {
     Object.assign(form, initialForm);
   }
@@ -179,6 +192,7 @@ export const useProfileStore = defineStore('profile', () => {
     // Getters
     avatar,
     isDailyDone,
+    follow,
     totalDone,
     totalAchievements,
     joinTime,
@@ -192,6 +206,7 @@ export const useProfileStore = defineStore('profile', () => {
     uploadAvatar,
     deleteAvatar,
     updateAvatar,
+    toggleFollow,
     clearForm,
     updateForm,
     updatePassword,

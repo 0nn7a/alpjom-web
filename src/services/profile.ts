@@ -5,7 +5,8 @@ import type {
   Profile,
   UpdatePasswordRequest,
   UpdateUserRequest,
-  UserAvatar
+  UserAvatar,
+  UserFollow
 } from '@/types/profile.ts';
 
 export const profileService = {
@@ -26,5 +27,7 @@ export const profileService = {
     return api.upload(API.PROFILE.AVATAR, formData);
   },
   deleteAvatar: (ids: number[]): Promise<ApiResponse<void>> =>
-    api.delete(API.PROFILE.AVATAR, { ids })
+    api.delete(API.PROFILE.AVATAR, { ids }),
+  toggleFollow: (followingUsername: string): Promise<ApiResponse<UserFollow>> =>
+    api.post(`${API.PROFILE.FOLLOW}/${followingUsername}`)
 };
