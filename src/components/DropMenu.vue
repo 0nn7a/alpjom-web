@@ -57,7 +57,12 @@ const defaultSections = computed<MenuSection[]>(() => {
             name: 'profile',
             params: { username: authStore.user?.username }
           },
-          disabled: authStore.user === null
+          disabled: !authStore.isLoggedIn
+        },
+        {
+          label: 'Ranking',
+          to: { name: 'ranking' },
+          disabled: !authStore.isLoggedIn
         },
         { label: 'Wordle', to: { name: 'wordle-setup' } }
       ]

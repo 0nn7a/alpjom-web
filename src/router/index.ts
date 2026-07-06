@@ -29,6 +29,12 @@ const routes: RouteRecordRaw[] = [
         ]
       },
       {
+        path: 'ranking',
+        name: 'ranking',
+        component: () => import('@/pages/ComingSoon.vue'),
+        meta: { auth: false }
+      },
+      {
         path: 'wordle',
         children: [
           {
