@@ -8,6 +8,7 @@ import type {
   UserAvatar,
   UserFollow
 } from '@/types/profile.ts';
+import type { User } from '@/types/auth.ts';
 
 export const profileService = {
   profile: (username: string): Promise<ApiResponse<Profile>> =>
@@ -28,6 +29,11 @@ export const profileService = {
   },
   deleteAvatar: (ids: number[]): Promise<ApiResponse<void>> =>
     api.delete(API.PROFILE.AVATAR, { ids }),
+
+  getFollower: (username: string): Promise<ApiResponse<User[]>> =>
+    api.get(`${API.PROFILE.FOLLOW.FOLLOWER}/${username}`),
+  getFollowing: (username: string): Promise<ApiResponse<User[]>> =>
+    api.get(`${API.PROFILE.FOLLOW.FOLLOWING}/${username}`),
   toggleFollow: (followingUsername: string): Promise<ApiResponse<UserFollow>> =>
-    api.post(`${API.PROFILE.FOLLOW}/${followingUsername}`)
+    api.post(`${API.PROFILE.FOLLOW.BASE}/${followingUsername}`)
 };

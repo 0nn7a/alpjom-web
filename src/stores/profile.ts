@@ -9,6 +9,8 @@ import {
   PasswordPattern,
   UsernamePattern
 } from '@/types/form.ts';
+import { useAuthStore } from '@/stores/auth.ts';
+import { useRoute, useRouter } from 'vue-router';
 
 export const useProfileStore = defineStore('profile', () => {
   // 更新表單用的靜態資料
@@ -39,6 +41,9 @@ export const useProfileStore = defineStore('profile', () => {
 
   // States
   const toastStore = useToastStore();
+  const authStore = useAuthStore();
+  const route = useRoute();
+  const router = useRouter();
 
   const username = ref<string>('');
   const profile = ref<Profile | null>(null);
@@ -140,8 +145,36 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
+  async function getFollower() {
+    try {
+      const { data } = await profileService.getFollower(username.value);
+      return data;
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+      throw err;
+    }
+  }
+  async function getFollowing() {
+    try {
+      const { data } = await profileService.getFollowing(username.value);
+      return data;
+    } catch (err) {
+      if (err instanceof ApiError)
+        toastStore.notify(err.message, { tone: 'error' });
+      throw err;
+    }
+  }
   async function toggleFollow() {
     try {
+      if (!authStore.isLoggedIn) {
+        toastStore.notify('進行該操作前需先登入！', { tone: 'warning' });
+        await router.push({
+          name: 'login',
+          query: { redirect: route.fullPath }
+        });
+        return;
+      }
       const { data } = await profileService.toggleFollow(username.value);
       if (profile.value) {
         profile.value = { ...profile.value, follow: data };
@@ -206,6 +239,8 @@ export const useProfileStore = defineStore('profile', () => {
     uploadAvatar,
     deleteAvatar,
     updateAvatar,
+    getFollower,
+    getFollowing,
     toggleFollow,
     clearForm,
     updateForm,

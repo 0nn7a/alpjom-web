@@ -379,7 +379,7 @@ onBeforeUnmount(() => {
   @apply h-10 aspect-square object-cover border border-(--aj-color-border) rounded-full;
 }
 .username {
-  @apply leading-none before:content-['@'] before:inline-block before:text-(--aj-color-subtle) before:font-light before:-translate-y-px;
+  @apply leading-none prefix-at;
 
   &:hover {
     @apply underline cursor-pointer;

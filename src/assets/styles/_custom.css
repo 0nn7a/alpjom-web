@@ -19,11 +19,18 @@
 }
 
 
+
 @utility divide-vertical {
   @apply h-full w-0 border-r border-(--aj-color-ring);
 }
 @utility divide-horizontal {
   @apply h-0 w-full border-b border-(--aj-color-ring);
+}
+
+
+
+@utility prefix-at {
+  @apply before:content-['@'] before:inline-block before:text-(--aj-color-subtle) before:font-light before:-translate-y-px;
 }
 
 

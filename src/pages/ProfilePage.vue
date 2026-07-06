@@ -23,6 +23,7 @@ import DiaLog from '@/components/DiaLog.vue';
 import FormInput from '@/components/FormInput.vue';
 import { useFormValidation } from '@/composables/useFormValidation.ts';
 import RollingNumber from '@/components/RollingNumber.vue';
+import type { User } from '@/types/auth.ts';
 
 const route = useRoute();
 const router = useRouter();
@@ -93,6 +94,31 @@ const submit = (close: () => void) =>
         toastStore.notify(err.message, { tone: 'error' });
     }
   });
+
+// 追蹤關係列表
+const dialogFollowShow = ref(false);
+watch(dialogFollowShow, async (val) => {
+  if (val) {
+    switch (dialogFollowTitle.value) {
+      case '粉絲列表':
+        dialogFollowList.value = await profileStore.getFollower();
+        break;
+      case '追蹤中列表':
+        dialogFollowList.value = await profileStore.getFollowing();
+        break;
+    }
+  } else {
+    dialogFollowTitle.value = '';
+    dialogFollowList.value = [];
+  }
+});
+
+const dialogFollowTitle = ref('');
+const dialogFollowList = ref<User[]>([]);
+async function openDialogFollow(title: string) {
+  dialogFollowTitle.value = title;
+  dialogFollowShow.value = true;
+}
 
 // HeatMap
 function handleDayClick(cell: HeatmapCell) {
@@ -165,9 +191,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="w-full flex items-center gap-1">
-          <p
-            class="text-xl before:content-['@'] before:inline-block before:text-(--aj-color-subtle) before:font-light before:-translate-y-px"
-          >
+          <p class="text-xl prefix-at">
             {{ pathUsername }}
           </p>
           <CheckBadgeIcon
@@ -186,14 +210,22 @@ onBeforeUnmount(() => {
         <div
           class="mb-2 w-full flex items-center gap-2 text-xs text-(--aj-color-subtle)"
         >
-          <p>
+          <button
+            type="button"
+            class="cursor-pointer transition-colors duration-300 hover:text-(--aj-color-muted)"
+            @click="openDialogFollow('粉絲列表')"
+          >
             粉絲
             <RollingNumber :value="profileStore.follow?.followerCount || 0" />
-          </p>
-          <p>
+          </button>
+          <button
+            type="button"
+            class="cursor-pointer transition-colors duration-300 hover:text-(--aj-color-muted)"
+            @click="openDialogFollow('追蹤中列表')"
+          >
             追蹤中
             <RollingNumber :value="profileStore.follow?.followingCount || 0" />
-          </p>
+          </button>
         </div>
         <button
           v-if="!isSameUser"
@@ -371,6 +403,46 @@ onBeforeUnmount(() => {
       <button form="profile-form" type="submit" class="btn-primary">
         送出
       </button>
+    </template>
+  </DiaLog>
+
+  <DiaLog v-model="dialogFollowShow" :title="dialogFollowTitle">
+    <template #default="{ close }">
+      <div class="flex flex-col">
+        <p
+          v-if="dialogFollowList.length <= 0"
+          class="my-3 text-sm text-(--aj-color-subtle) text-center"
+        >
+          暫無資料
+        </p>
+        <template
+          v-else
+          v-for="(user, idx) in dialogFollowList"
+          :key="'follower' + user.id"
+        >
+          <span v-if="idx" class="my-3 divide-horizontal" />
+          <div class="flex items-center gap-3" :title="user.username">
+            <img
+              :src="user.avatar"
+              :alt="user.username + ' avatar'"
+              class="h-10 aspect-square border border-(--aj-color-surface-hover) object-cover rounded-full"
+            />
+            <button
+              type="button"
+              class="text-lg prefix-at truncate cursor-pointer hover:underline!"
+              @click="
+                close();
+                router.push({
+                  name: 'profile',
+                  params: { username: user.username }
+                });
+              "
+            >
+              {{ user.username }}
+            </button>
+          </div>
+        </template>
+      </div>
     </template>
   </DiaLog>
 

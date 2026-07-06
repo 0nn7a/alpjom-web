@@ -24,7 +24,11 @@ export const API = {
     USER: '/profile/user',
     PASSWORD: '/profile/password',
     AVATAR: '/profile/avatar',
-    FOLLOW: '/profile/follow'
+    FOLLOW: {
+      BASE: '/profile/follow',
+      FOLLOWER: '/profile/follow/follower',
+      FOLLOWING: '/profile/follow/following'
+    }
   }
 };
 
