@@ -99,13 +99,18 @@ const submit = (close: () => void) =>
 const dialogFollowShow = ref(false);
 watch(dialogFollowShow, async (val) => {
   if (val) {
-    switch (dialogFollowTitle.value) {
-      case '粉絲列表':
-        dialogFollowList.value = await profileStore.getFollower();
-        break;
-      case '追蹤中列表':
-        dialogFollowList.value = await profileStore.getFollowing();
-        break;
+    try {
+      loading.value = true;
+      switch (dialogFollowTitle.value) {
+        case '粉絲列表':
+          dialogFollowList.value = await profileStore.getFollower();
+          break;
+        case '追蹤中列表':
+          dialogFollowList.value = await profileStore.getFollowing();
+          break;
+      }
+    } finally {
+      loading.value = false;
     }
   } else {
     dialogFollowTitle.value = '';
@@ -409,12 +414,18 @@ onBeforeUnmount(() => {
   <DiaLog v-model="dialogFollowShow" :title="dialogFollowTitle">
     <template #default="{ close }">
       <div class="flex flex-col">
+        <ArrowPathIcon
+          v-if="loading"
+          class="my-2.5 mx-auto h-5 w-5 animate-[spin_2s_linear_infinite]"
+        />
+
         <p
-          v-if="dialogFollowList.length <= 0"
+          v-else-if="dialogFollowList.length <= 0"
           class="my-3 text-sm text-(--aj-color-subtle) text-center"
         >
           暫無資料
         </p>
+
         <template
           v-else
           v-for="(user, idx) in dialogFollowList"
