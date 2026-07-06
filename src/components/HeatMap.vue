@@ -79,9 +79,10 @@ const weeks = computed<HeatmapCell[][]>(() => {
 });
 
 /** 月標籤（只在該週是某月第一次出現時才顯示）*/
+/** 月標籤至少需要間隔幾週才顯示，避免文字重疊（可依實際字寬微調） */
+const MIN_LABEL_GAP = 2;
+
 const monthLabels = computed<(string | null)[]>(() => {
-  const labels: (string | null)[] = [];
-  const seen = new Set<string>();
   const MONTHS = [
     '1月',
     '2月',
@@ -97,17 +98,32 @@ const monthLabels = computed<(string | null)[]>(() => {
     '12月'
   ];
 
-  // 每個 weekIndex 對應的月份標籤
-  for (const week of weeks.value) {
-    const month = parseInt(week[0].date.slice(5, 7)) - 1;
+  // 1. 先收集每個月第一次出現的 weekIndex
+  const monthStarts: { weekIndex: number; label: string }[] = [];
+  const seen = new Set<string>();
+
+  weeks.value.forEach((week, wi) => {
     const yearMonth = week[0].date.slice(0, 7); // '2025-06'
     if (!seen.has(yearMonth)) {
       seen.add(yearMonth);
-      labels.push(MONTHS[month]);
-    } else {
-      labels.push(null);
+      const month = parseInt(week[0].date.slice(5, 7)) - 1;
+      monthStarts.push({ weekIndex: wi, label: MONTHS[month] });
     }
-  }
+  });
+
+  // 2. 若跟「下一個月」的間距小於門檻，就跳過目前這個標籤
+  //    （優先保留比較新、欄位資訊更完整的月份）
+  const filtered = monthStarts.filter((cur, idx) => {
+    const next = monthStarts[idx + 1];
+    if (!next) return true; // 最後一個月沒有比較對象，一定保留
+    return next.weekIndex - cur.weekIndex >= MIN_LABEL_GAP;
+  });
+
+  // 3. 還原成跟 weeks 等長的陣列
+  const labels: (string | null)[] = new Array(weeks.value.length).fill(null);
+  filtered.forEach(({ weekIndex, label }) => {
+    labels[weekIndex] = label;
+  });
   return labels;
 });
 
