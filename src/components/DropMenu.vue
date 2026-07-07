@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router';
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { RouterLink } from 'vue-router';
+import { ref, onMounted, onUnmounted, computed, type Component } from 'vue';
 import { useAuthStore } from '@/stores/auth.ts';
+import {
+  UserIcon,
+  PuzzlePieceIcon,
+  ArrowLeftEndOnRectangleIcon,
+  ArrowRightEndOnRectangleIcon
+} from '@heroicons/vue/24/outline';
 
 const authStore = useAuthStore();
 
 interface MenuItem {
   label: string;
+  icon?: Component;
   to?: string | RouteLocationRaw;
   href?: string;
   caption?: string;
@@ -34,14 +42,16 @@ const props = withDefaults(defineProps<Props>(), {
 
 // 把需要 runtime 才能建立的 sections 放在 computed
 const defaultSections = computed<MenuSection[]>(() => {
-  let item: MenuItem = authStore.isLoggedIn
+  const authMenuItem: MenuItem = authStore.isLoggedIn
     ? {
-        label: 'Log out',
+        label: '登出',
+        icon: ArrowLeftEndOnRectangleIcon,
         variant: 'danger',
         action: () => authStore.logout()
       }
     : {
-        label: 'Log in',
+        label: '登入',
+        icon: ArrowRightEndOnRectangleIcon,
         variant: 'success',
         to: { name: 'login' }
       };
@@ -50,9 +60,10 @@ const defaultSections = computed<MenuSection[]>(() => {
     {
       label: 'alpJom',
       items: [
-        { label: 'Home', to: { name: 'home' } },
+        { label: '首頁', to: { name: 'home' } },
         {
-          label: 'Profile',
+          label: '個人資料',
+          icon: UserIcon,
           to: {
             name: 'profile',
             params: { username: authStore.user?.username }
@@ -60,19 +71,35 @@ const defaultSections = computed<MenuSection[]>(() => {
           disabled: !authStore.isLoggedIn
         },
         {
-          label: 'Ranking',
+          label: '排行榜',
           to: { name: 'ranking' },
           disabled: !authStore.isLoggedIn
+        }
+      ]
+    },
+    {
+      label: 'Games',
+      items: [
+        {
+          label: 'Wordle',
+          icon: PuzzlePieceIcon,
+          to: { name: 'wordle-setup' }
         },
-        { label: 'Wordle', to: { name: 'wordle-setup' } }
+        {
+          label: '敬請期待',
+          disabled: true
+        }
       ]
     },
     {
       label: 'Author',
       items: [
-        { label: 'Cake', href: 'https://www.cake.me/me/0nn/portfolios' },
         {
-          label: '104 Resume',
+          label: 'Cake',
+          href: 'https://www.cake.me/me/0nn/portfolios'
+        },
+        {
+          label: '104',
           href: 'https://pda.104.com.tw/profile/share/a6cpdgDg7kSUoYTlTkzIs0y2qlLu7aWY'
         }
       ]
@@ -87,7 +114,7 @@ const defaultSections = computed<MenuSection[]>(() => {
       ]
     },
     {
-      items: [item]
+      items: [authMenuItem]
     }
   ];
 });
@@ -115,10 +142,10 @@ onUnmounted(() =>
   document.removeEventListener('mousedown', handleClickOutside)
 );
 
-// 動態 class — 每個選項的基礎樣式
+// 每個選項的基礎樣式,依 variant / disabled 決定
 function itemClass(item: MenuItem) {
   const base = [
-    'flex items-center justify-between w-full rounded-md px-2.5 py-1.5 gap-1.5',
+    'flex items-center w-full rounded-md px-2.5 py-1.5 gap-1.5',
     'text-sm select-none cursor-pointer transition-all duration-100'
   ];
   if (item.disabled) {
@@ -133,6 +160,55 @@ function itemClass(item: MenuItem) {
     base.push('text-(--aj-color-text) hover:bg-(--aj-color-ring)');
   }
   return base.join(' ');
+}
+
+function itemTitle(item: MenuItem) {
+  return `${item.label}${item.caption ? `\n${item.caption}` : ''}`;
+}
+
+// 依 item 種類決定要 render 哪個標籤 / 元件
+function itemTag(item: MenuItem) {
+  if (item.disabled) return 'span';
+  if (item.href) return 'a';
+  if (item.to) return RouterLink;
+  return 'button';
+}
+
+// 依 item 種類組出對應的 props / 事件,交給 v-bind 使用
+function itemBindings(item: MenuItem): Record<string, unknown> {
+  const common = {
+    class: itemClass(item),
+    role: 'menuitem',
+    title: itemTitle(item)
+  };
+
+  if (item.disabled) return common;
+
+  if (item.href)
+    return {
+      ...common,
+      href: item.href,
+      target: '_blank',
+      rel: 'noopener noreferrer nofollow',
+      onClick: close
+    };
+
+  if (item.to)
+    return {
+      ...common,
+      to: item.to,
+      onClick: close
+    };
+
+  // action button
+  return {
+    ...common,
+    type: 'button',
+    onClick: () => {
+      item.action?.();
+      close();
+    }
+  };
 }
 </script>
 
@@ -189,104 +265,49 @@ function itemClass(item: MenuItem) {
             {{ section.label }}
           </p>
 
-          <!-- 選項 -->
+          <!-- 選項：四種類型（disabled / 外部連結 / 路由 / action)統一用同一段 markup -->
           <div class="px-1">
-            <template v-for="item in section.items" :key="item.label">
-              <!-- Disabled 狀態 -->
-              <span
-                v-if="item.disabled"
-                :class="itemClass(item)"
-                role="menuitem"
-                :title="`${item.label}${item.caption ? `\n${item.caption}` : ''}`"
-              >
-                <span class="flex items-center gap-2">
-                  {{ item.label }}
-                </span>
-                <span class="flex items-center gap-1.5">
-                  <span
-                    v-if="item.caption"
-                    class="text-xs text-(--aj-color-subtle)"
-                  >
-                    {{ item.caption }}
-                  </span>
-                </span>
+            <component
+              v-for="item in section.items"
+              :key="item.label"
+              :is="itemTag(item)"
+              v-bind="itemBindings(item)"
+            >
+              <span class="w-4">
+                <Component
+                  v-if="item.icon"
+                  :is="item.icon"
+                  class="w-full aspect-square"
+                />
               </span>
 
-              <!-- 外部連結 -->
-              <a
-                v-else-if="item.href"
-                :href="item.href"
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                @click="close"
-                :class="itemClass(item)"
-                role="menuitem"
-                :title="`${item.label}${item.caption ? `\n${item.caption}` : ''}`"
-              >
-                <span class="flex items-center gap-2">
-                  {{ item.label }}
-                </span>
-                <span class="flex items-center gap-1.5">
-                  <span
-                    v-if="item.caption"
-                    class="text-xs text-(--aj-color-subtle)"
-                  >
-                    {{ item.caption }}
-                  </span>
-                  <!-- 外部連結箭頭 -->
-                  <svg
-                    class="w-3 h-3 text-(--aj-color-subtle)"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                  >
-                    <path
-                      d="M4 12L12 4M12 4H6.5M12 4V9.5"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
-              </a>
+              <span>{{ item.label }}</span>
 
-              <!-- Router 路由 -->
-              <RouterLink
-                v-else-if="item.to"
-                :to="item.to"
-                @click="close"
-                :class="itemClass(item)"
-                role="menuitem"
-                :title="`${item.label}${item.caption ? `\n${item.caption}` : ''}`"
-              >
-                <span> {{ item.label }} </span>
+              <span class="ms-auto flex items-center gap-1.5">
                 <span
                   v-if="item.caption"
                   class="max-w-[5ch] text-xs text-(--aj-color-subtle)"
                 >
                   {{ item.caption }}
                 </span>
-              </RouterLink>
 
-              <!-- 一般方法 -->
-              <button
-                v-else-if="item.action"
-                @click="
-                  item.action();
-                  close();
-                "
-                :class="itemClass(item)"
-                role="menuitem"
-              >
-                <span> {{ item.label }} </span>
-                <span
-                  v-if="item.caption"
-                  class="max-w-[5ch] text-xs text-(--aj-color-subtle)"
+                <!-- 只有外部連結才顯示的箭頭 -->
+                <svg
+                  v-if="item.href"
+                  class="w-3 h-3 text-(--aj-color-subtle)"
+                  viewBox="0 0 16 16"
+                  fill="none"
                 >
-                  {{ item.caption }}
-                </span>
-              </button>
-            </template>
+                  <path
+                    d="M4 12L12 4M12 4H6.5M12 4V9.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+            </component>
           </div>
         </template>
       </div>
