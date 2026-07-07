@@ -92,7 +92,7 @@ onMounted(async () => {
     @apply scale-180 -rotate-6;
 
     &:nth-of-type(even) {
-      @apply hover:rotate-3;
+      @apply rotate-3;
     }
   }
 }
