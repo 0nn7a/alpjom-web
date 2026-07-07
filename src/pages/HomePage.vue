@@ -85,9 +85,15 @@ onMounted(async () => {
   @apply leading-7 text-xl whitespace-normal;
 }
 .text-flow .photo {
-  @apply inline-block mx-1 h-6 w-12 align-text-bottom rounded-md object-cover scale-100 rotate-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-180 hover:-rotate-6;
-  &:nth-of-type(even) {
-    @apply hover:rotate-3;
+  @apply inline-block mx-1 h-6 w-12 align-text-bottom rounded-md object-cover scale-100 rotate-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)];
+
+  &:hover,
+  &:active {
+    @apply scale-180 -rotate-6;
+
+    &:nth-of-type(even) {
+      @apply hover:rotate-3;
+    }
   }
 }
 </style>
