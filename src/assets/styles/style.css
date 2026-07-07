@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @import './_variables.css';
 @import './_animations.css';

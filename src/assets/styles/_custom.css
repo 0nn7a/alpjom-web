@@ -1,5 +1,5 @@
 @utility btn-base {
-  @apply py-1 px-3 border rounded-md cursor-pointer transition duration-300;
+  @apply py-1 px-3 border rounded-md cursor-pointer transition duration-300 select-none;
 }
 
 .btn-primary {
@@ -53,26 +53,16 @@ html[data-theme='dark'] {
 
 
 .wordle-item {
-  position: relative;
-  color: var(--wordle-text);
+  @apply relative text-(--wordle-text);
   &::before,
   &::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    @apply content-[''] absolute left-[50%] translate-x-[-50%];
   }
   &::before {
-    bottom: 5%;
-    height: 0.16rem;
-    aspect-ratio: 1 / 1;
-    background-color: var(--wordle-dot);
-    border-radius: 100%;
+    @apply bottom-[5%] h-[0.16rem] aspect-square bg-(--wordle-dot) rounded-full;
   }
   &::after {
-    bottom: 7%;
-    width: 70%;
-    border-bottom: 0.1rem solid var(--wordle-border);
+    @apply bottom-[7%] w-[70%] border-b-[0.1rem] border-(--wordle-border);
   }
 }
 .wordle-g {
@@ -89,4 +79,25 @@ html[data-theme='dark'] {
   --wordle-text: var(--aj-color-subtle);
   --wordle-dot: transparent;
   --wordle-border: transparent;
+}
+
+
+
+.pattern-dot {
+  @apply bg-(--aj-color-surface) bg-size-[1rem_1rem];
+  background-image: radial-gradient(
+          circle,
+          var(--aj-color-border) 0.075rem,
+          transparent 0.075rem
+  );
+  mask: radial-gradient(
+          ellipse at center,
+          rgba(0, 0, 0, 0.7) 0%,
+          rgba(0, 0, 0, 0) 75%
+  ) center / 100% 100% no-repeat;
+  -webkit-mask: radial-gradient(
+          ellipse at center,
+          rgba(0, 0, 0, 0.7) 0%,
+          rgba(0, 0, 0, 0) 75%
+  ) center / 100% 100% no-repeat;
 }

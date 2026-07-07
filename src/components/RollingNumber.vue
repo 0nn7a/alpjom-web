@@ -47,6 +47,7 @@ watch(
   height: 1em;
   width: 1ch;
   display: inline-block;
+  text-align: center;
 }
 
 .digit {

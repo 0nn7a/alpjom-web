@@ -7,6 +7,11 @@ export const API = {
     LOGOUT: '/auth/logout',
     REFRESH: '/auth/refresh'
   },
+  GAME: {
+    COUNT: {
+      FINISHED: '/game/count/finished'
+    }
+  },
   WORDLE: {
     START: '/wordle/start',
     GUESS: '/wordle/guess',
