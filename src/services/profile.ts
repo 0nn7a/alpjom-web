@@ -9,10 +9,18 @@ import type {
   UserFollow
 } from '@/types/profile.ts';
 import type { User } from '@/types/auth.ts';
+import type { PageRequest } from '@/types/page.ts';
 
 export const profileService = {
-  profile: (username: string): Promise<ApiResponse<Profile>> =>
-    api.get(API.PROFILE.BASE, { username }),
+  profile: (
+    username: string,
+    pageRequest: PageRequest
+  ): Promise<ApiResponse<Profile>> =>
+    api.get(API.PROFILE.BASE, {
+      username,
+      page: pageRequest.page,
+      size: pageRequest.size
+    }),
 
   updateUser: (data: UpdateUserRequest): Promise<ApiResponse<void>> =>
     api.patch(API.PROFILE.USER, data),

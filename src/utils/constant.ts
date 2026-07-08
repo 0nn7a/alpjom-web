@@ -10,6 +10,9 @@ export const API = {
   GAME: {
     COUNT: {
       FINISHED: '/game/count/finished'
+    },
+    RECORD: {
+      FINISHED: '/game/record/finished'
     }
   },
   WORDLE: {

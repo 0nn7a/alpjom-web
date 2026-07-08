@@ -55,9 +55,7 @@ onMounted(async () => {
         every day.
       </p>
 
-      <p
-        class="py-0.5 px-2 text-sm bg-(--aj-color-surface-hover) rounded-full select-none"
-      >
+      <p class="badge-sm">
         <RollingNumber :value="allSiteGameCount" /> games played
       </p>
 

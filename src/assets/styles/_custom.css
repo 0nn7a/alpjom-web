@@ -101,3 +101,16 @@ html[data-theme='dark'] {
           rgba(0, 0, 0, 0) 75%
   ) center / 100% 100% no-repeat;
 }
+
+
+
+@utility badge-base {
+  @apply bg-(--aj-color-surface-hover) rounded-full select-none;
+}
+
+.badge-xs {
+  @apply badge-base py-0 px-1.5 text-xs;
+}
+.badge-sm {
+  @apply badge-base py-0.5 px-2 text-sm;
+}

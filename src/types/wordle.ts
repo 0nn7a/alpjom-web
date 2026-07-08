@@ -1,5 +1,19 @@
 import type { WordleDifficulty, WordleMode } from '@/utils/wordle.ts';
 
+export interface WordleRecord {
+  id: number;
+  userId: number;
+  wordId: number;
+  mode: WordleMode;
+  difficulty: WordleDifficulty;
+  maxGuesses: number; // 0 -> 無限
+  isWin: boolean; // 1/0 -> true/false, null -> ing
+  shareToken: string; // 只在遊戲結束後回傳，能順手導向至分享頁
+  createdAt: string;
+  finishedAt: string;
+  date: string;
+}
+
 // 開始遊戲
 export interface WordleStartRequest {
   mode: WordleMode;

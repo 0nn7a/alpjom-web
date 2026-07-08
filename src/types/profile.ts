@@ -1,4 +1,6 @@
 import type { HeatmapRecord } from '@/types/heatmap.ts';
+import type { PageResponse } from '@/types/page.ts';
+import type { WordleRecord } from '@/types/wordle.ts';
 
 export interface Profile {
   id: number; // user id
@@ -10,6 +12,7 @@ export interface Profile {
   totalDone: number;
   totalAchievements: number;
   heatmap: HeatmapRecord[];
+  recentGames: PageResponse<WordleRecord>;
 }
 
 // 用戶頭貼記錄

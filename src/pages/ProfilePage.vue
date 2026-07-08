@@ -16,7 +16,11 @@ import {
   PlusIcon,
   EyeIcon,
   EyeSlashIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  BarsArrowDownIcon,
+  TrophyIcon
 } from '@heroicons/vue/24/outline';
 import ToolTip from '@/components/ToolTip.vue';
 import DiaLog from '@/components/DiaLog.vue';
@@ -140,6 +144,13 @@ function formatCount(content: unknown): string {
   const { count, isFuture } = content as HeatmapCell;
   if (isFuture) return '—';
   return count === 0 ? '無完成紀錄' : `完成 ${count} 局`;
+}
+
+// 最近遊戲紀錄
+async function flipRecentGame(val: number) {
+  if (val <= 0 || val > profileStore.maxPage) return;
+  profileStore.pageRequest.page = val;
+  await profileStore.flipRecentGame();
 }
 
 // 查找用戶變化時重新取得資料
@@ -279,6 +290,51 @@ onBeforeUnmount(() => {
         <p class="mb-4 text-sm">遊戲統計及分析</p>
         <div class="shrink-0 h-24 flex bg-(--aj-color-surface) rounded">
           <p class="m-auto text-sm text-(--aj-color-muted)">Coming soon...</p>
+        </div>
+
+        <span class="divide-horizontal my-4" />
+
+        <div class="mb-4 flex items-center text-sm select-none">
+          <p>最近遊戲紀錄</p>
+          <BarsArrowDownIcon
+            class="ms-1.5 h-3.5 aspect-square text-(--aj-color-subtle)"
+          />
+          <p class="mr-auto text-xs text-(--aj-color-subtle)">完成時間</p>
+          <ChevronLeftIcon
+            class="pageIcon"
+            @click="flipRecentGame(profileStore.pageRequest.page - 1)"
+          />
+          <p class="mx-1">{{ profileStore.pageRequest.page }}</p>
+          <ChevronRightIcon
+            class="pageIcon"
+            @click="flipRecentGame(profileStore.pageRequest.page + 1)"
+          />
+        </div>
+        <div class="flex flex-col gap-3">
+          <RouterLink
+            v-for="row in profileStore.recentGames"
+            :key="'recent game ' + row.id"
+            :to="{
+              name: 'wordle-share',
+              params: { shareToken: row.shareToken }
+            }"
+            class="flex flex-col p-2 gap-2 border border-(--aj-color-surface-hover) rounded cursor-pointer transition-colors duration-300 hover:border-(--aj-color-border)"
+          >
+            <div class="ms-1 flex items-center gap-1">
+              <p>wordle</p>
+              <TrophyIcon v-if="row.isWin" class="ms-auto h-4 aspect-square" />
+            </div>
+            <div class="flex items-center gap-1 text-xs">
+              <p class="badge-xs">{{ row.mode }}</p>
+              <p class="badge-xs">{{ row.difficulty }}</p>
+              <CheckIcon
+                class="ms-auto h-3.5 aspect-square text-(--aj-color-muted)"
+              />
+              <p class="text-(--aj-color-muted)">
+                {{ row.finishedAt.replace('T', ' ') }}
+              </p>
+            </div>
+          </RouterLink>
         </div>
       </section>
     </div>
@@ -498,5 +554,9 @@ onBeforeUnmount(() => {
 }
 .avatar__frame {
   @apply flex absolute inset-0 text-white bg-neutral-600/50 opacity-0 transition-opacity duration-300 ease-in-out;
+}
+
+.pageIcon {
+  @apply h-3.5 aspect-square cursor-pointer transition-colors duration-300 hover:text-(--aj-color-muted);
 }
 </style>
