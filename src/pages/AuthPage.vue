@@ -14,6 +14,7 @@ import {
   PasswordPattern,
   UsernamePattern
 } from '@/types/form.js';
+import IconSvg from '@/assets/images/icon.svg';
 
 const authStore = useAuthStore();
 const toastStore = useToastStore();
@@ -107,7 +108,9 @@ const submit = () =>
 
 <template>
   <section class="w-full m-auto p-8 flex flex-col justify-center items-center">
+    <IconSvg class="h-16 aspect-square" />
     <h1 class="font-semibold text-3xl">alpJom</h1>
+
     <form
       id="auth-form"
       class="w-full flex flex-col gap-x-4 gap-y-0.5 my-10"

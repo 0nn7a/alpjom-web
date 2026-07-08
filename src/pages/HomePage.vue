@@ -5,6 +5,7 @@ import RollingNumber from '@/components/RollingNumber.vue';
 import { gameService } from '@/services/game.ts';
 import { ApiError } from '@/types/common.ts';
 import { useToastStore } from '@/stores/toast.ts';
+import IconSvg from '@/assets/images/icon.svg';
 
 const toastStore = useToastStore();
 const allSiteGameCount = ref(0);
@@ -23,10 +24,12 @@ onMounted(async () => {
 <template>
   <DefaultLayout>
     <section
-      class="my-14 flex flex-col px-2 justify-start items-start overflow-y-auto"
+      class="my-8 flex flex-col px-2 justify-start items-start overflow-y-auto"
     >
       <span class="fixed -z-10 top-8 -right-16 h-52 w-screen pattern-dot" />
       <span class="fixed -z-10 -bottom-32 -left-32 h-96 w-screen pattern-dot" />
+
+      <IconSvg class="-ms-3 shrink-0 h-20 aspect-square" />
 
       <p class="mb-3 text-description">Think you know your words?</p>
 
