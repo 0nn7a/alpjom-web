@@ -39,13 +39,14 @@ onMounted(async () => {
           src="https://pub-bf0bdbb9cd5b445db961a77785d77f93.r2.dev/Default/home-2.png"
           alt="home image"
         />
-        puts your vocabulary to the test
+        puts your vocabulary
         <img
           class="photo"
           src="https://pub-bf0bdbb9cd5b445db961a77785d77f93.r2.dev/Default/home-3.png"
           alt="home image"
         />
-        with a fresh <span class="px-1 mark-highlight"> puzzle </span>
+        to the test with a fresh
+        <span class="px-1 mark-highlight"> puzzle </span>
         <img
           class="photo"
           src="https://pub-bf0bdbb9cd5b445db961a77785d77f93.r2.dev/Default/home-4.png"
@@ -55,7 +56,7 @@ onMounted(async () => {
       </p>
 
       <p
-        class="py-0.5 px-2 text-xs bg-(--aj-color-surface-hover) rounded-full select-none"
+        class="py-0.5 px-2 text-sm bg-(--aj-color-surface-hover) rounded-full select-none"
       >
         <RollingNumber :value="allSiteGameCount" /> games played
       </p>
@@ -79,10 +80,10 @@ onMounted(async () => {
 @reference '@/assets/styles/style';
 
 .text-description {
-  @apply text-xs text-(--aj-color-subtle);
+  @apply text-sm text-(--aj-color-subtle);
 }
 .text-flow {
-  @apply leading-7 text-xl whitespace-normal;
+  @apply leading-7 text-2xl whitespace-normal;
 }
 .text-flow .photo {
   @apply inline-block mx-1 h-6 w-12 align-text-bottom rounded-md object-cover scale-100 rotate-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)];
