@@ -44,18 +44,18 @@ const isSameUser = computed(
 );
 
 // 編輯頭貼
+const loadingAvatar = ref(false);
 const dialogAvatarShow = ref(false);
 watch(dialogAvatarShow, async (val) => {
   if (val) await profileStore.getAvatar();
 });
 
-const loading = ref(false);
 const upload = async (e: Event) => {
   try {
-    loading.value = true;
+    loadingAvatar.value = true;
     await profileStore.uploadAvatar(e);
   } finally {
-    loading.value = false;
+    loadingAvatar.value = false;
   }
 };
 
@@ -100,11 +100,12 @@ const submit = (close: () => void) =>
   });
 
 // 追蹤關係列表
+const loadingFollow = ref(false);
 const dialogFollowShow = ref(false);
 watch(dialogFollowShow, async (val) => {
   if (val) {
     try {
-      loading.value = true;
+      loadingFollow.value = true;
       switch (dialogFollowTitle.value) {
         case '粉絲列表':
           dialogFollowList.value = await profileStore.getFollower();
@@ -114,7 +115,7 @@ watch(dialogFollowShow, async (val) => {
           break;
       }
     } finally {
-      loading.value = false;
+      loadingFollow.value = false;
     }
   } else {
     dialogFollowTitle.value = '';
@@ -147,10 +148,18 @@ function formatCount(content: unknown): string {
 }
 
 // 最近遊戲紀錄
+const loadingFlip = ref(false);
 async function flipRecentGame(val: number) {
   if (val <= 0 || val > profileStore.maxPage) return;
+  loadingFlip.value = true;
   profileStore.pageRequest.page = val;
-  await profileStore.flipRecentGame();
+
+  await Promise.all([
+    profileStore.flipRecentGame(), // 真實請求 api
+    new Promise((resolve) => setTimeout(resolve, 300)) // 骨架屏最短需要存在時長
+  ]);
+
+  loadingFlip.value = false;
 }
 
 // 查找用戶變化時重新取得資料
@@ -310,7 +319,15 @@ onBeforeUnmount(() => {
             @click="flipRecentGame(profileStore.pageRequest.page + 1)"
           />
         </div>
-        <div class="flex flex-col gap-3">
+        <div class="relative flex flex-col gap-3">
+          <span
+            v-if="loadingFlip"
+            class="absolute inset-0 flex bg-(--aj-color-bg)"
+          >
+            <ArrowPathIcon
+              class="m-auto h-5 w-5 animate-[spin_2s_linear_infinite]"
+            />
+          </span>
           <RouterLink
             v-for="row in profileStore.recentGames"
             :key="'recent game ' + row.id"
@@ -360,7 +377,7 @@ onBeforeUnmount(() => {
           </label>
         </template>
 
-        <span v-if="loading" class="avatar__item">
+        <span v-if="loadingAvatar" class="avatar__item">
           <ArrowPathIcon
             class="m-auto h-5 w-5 animate-[spin_2s_linear_infinite]"
           />
@@ -471,7 +488,7 @@ onBeforeUnmount(() => {
     <template #default="{ close }">
       <div class="flex flex-col">
         <ArrowPathIcon
-          v-if="loading"
+          v-if="loadingFollow"
           class="my-2.5 mx-auto h-5 w-5 animate-[spin_2s_linear_infinite]"
         />
 
