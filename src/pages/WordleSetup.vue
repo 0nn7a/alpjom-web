@@ -6,7 +6,8 @@ import {
   ArrowPathIcon,
   CheckBadgeIcon,
   TrophyIcon,
-  LockClosedIcon
+  LockClosedIcon,
+  LightBulbIcon
 } from '@heroicons/vue/24/outline';
 import { type Component, computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -22,9 +23,12 @@ import {
 } from '@/utils/wordle.ts';
 import type { WordleOngoing } from '@/types/wordle.ts';
 import { toTaiwanDateParts, toTaiwanDateStr } from '@/utils/common.ts';
+import ToolTip from '@/components/ToolTip.vue';
+import { useTooltipStore } from '@/stores/tooltip.ts';
 
 const router = useRouter();
 const wordleStore = useWordleStore();
+const tooltipStore = useTooltipStore();
 
 // 骨架屏
 const loading = ref(false);
@@ -182,6 +186,19 @@ onBeforeUnmount(() => {
 
 <template>
   <DefaultLayout>
+    <template #header>
+      <a
+        target="_blank"
+        href="https://app.arcade.software/share/5LyPtZZRVVQCVbl7iirF"
+        class="mr-2 flex items-center gap-0.5 text-sm cursor-pointer transition-colors duration-300 hover:text-(--aj-color-muted)"
+        @mouseenter="tooltipStore.show($event, '將前往外部網站進行教學 →')"
+        @mouseleave="tooltipStore.hide"
+      >
+        <LightBulbIcon class="h-4.5 aspect-square" />
+        <span>Guide</span>
+      </a>
+    </template>
+
     <section
       class="w-full relative flex flex-col items-center py-3 overflow-y-auto"
     >
@@ -364,6 +381,12 @@ onBeforeUnmount(() => {
       </button>
     </template>
   </DiaLog>
+
+  <ToolTip>
+    <template #default="{ content }">
+      {{ content }}
+    </template>
+  </ToolTip>
 </template>
 
 <style scoped>
