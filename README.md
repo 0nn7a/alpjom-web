@@ -42,7 +42,6 @@ alpJom 主要使用 Vue 與 Java 製作。
 
 - Node.js 24
 - pnpm 11
-- 可連線的 alpJom API 服務
 
 ### 啟動方式
 
@@ -51,16 +50,11 @@ pnpm install
 pnpm dev
 ```
 
-請於 `.env` 設定可連線的 API 位址：
+於 `.env` 設定可連線的 API 位址：
 
 ```env
 VITE_API_URL=http://localhost:8080
-```
-
-開發伺服器預設為：
-
-```text
-http://localhost:5173/alpjom-web/
+# 前端展示頁直接指向線上 API：https://alpjom.duckdns.org
 ```
 
 ## 專案結構
@@ -78,17 +72,11 @@ src/
 
 ## 自動化部署
 
-前端展示頁部署於 GitHub Pages：
-
-<https://0nn7a.github.io/alpjom-web/>
+前端展示頁部署於 [GitHub Pages](https://0nn7a.github.io/alpjom-web/)。
 
 推送至 `gh-pages` 分支後，GitHub Actions 會自動建置並部署網站。
 
-> 後端服務目前未常駐部署；完整遊戲流程需於本機啟動 API 後展示。
-
-## 展示說明
-
-前端已部署於 GitHub Pages；完整功能需搭配本機啟動的 API 與資料庫服務。面試展示時可於本機操作登入、遊戲流程、戰績分享及個人檔案等完整功能。
+後端 API 部署於 Oracle Cloud，網址由建置時期的環境變數 `VITE_API_URL` 注入（存放於 GitHub Actions 變數）。
 
 ## 相關專案
 
