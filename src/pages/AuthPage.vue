@@ -24,12 +24,12 @@ const route = useRoute();
 const routeName = computed(() => route.name);
 
 const isLogin = computed(() => routeName.value === 'login');
-const action = computed(() => (isLogin.value ? 'Login' : 'Register'));
+const action = computed(() => (isLogin.value ? '登入' : '註冊'));
 const direct = computed(() => (isLogin.value ? 'register' : 'login'));
 const hint = computed(() =>
   isLogin.value
-    ? 'New to alpJom? Create an account.'
-    : 'Already have an account? Go to login.'
+    ? '新加入的朋友嗎？註冊一個新帳號吧✨'
+    : '已擁有帳號？速速前去登入⚡️'
 );
 
 type AuthFormData = { email: string; username: string; password: string };
@@ -104,6 +104,11 @@ const submit = () =>
       loading.value = false;
     }
   });
+const fastLogin = () => {
+  formData.email = 'test@example.com';
+  formData.password = '0000';
+  submit();
+};
 </script>
 
 <template>
@@ -160,9 +165,19 @@ const submit = () =>
       </fieldset>
     </form>
 
-    <button type="submit" form="auth-form" class="btn-primary">
-      {{ action }}
-    </button>
+    <div class="flex gap-3">
+      <button type="submit" form="auth-form" class="btn-primary">
+        {{ action }}
+      </button>
+      <button
+        v-if="isLogin"
+        type="button"
+        class="btn-success"
+        @click="fastLogin"
+      >
+        快速體驗
+      </button>
+    </div>
     <RouterLink
       :to="{ name: direct }"
       class="mt-3 text-sm text-(--aj-color-subtle) transition duration-300 hover:text-(--aj-color-muted)"

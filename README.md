@@ -4,6 +4,11 @@
 
 [前端展示頁](https://0nn7a.github.io/alpjom-web/) · [後端原始碼](https://github.com/0nn7a/alpjom-api)
 
+```text
+測試帳號 / 密碼 （僅供快速體驗用途）
+test@example.com / 0000
+```
+
 alpJom 主要使用 Vue 與 Java 製作。
 
 名稱靈感來自 `wordle` 旋轉 180° 後看起來像 `alpJom` 的趣味聯想。目前已完成 Wordle 玩法，並以可擴充的益智遊戲平台為後續發展方向。
