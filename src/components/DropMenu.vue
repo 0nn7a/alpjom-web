@@ -99,8 +99,8 @@ const defaultSections = computed<MenuSection[]>(() => {
           href: 'https://www.cake.me/me/0nn/portfolios'
         },
         {
-          label: '104',
-          href: 'https://pda.104.com.tw/profile/share/a6cpdgDg7kSUoYTlTkzIs0y2qlLu7aWY'
+          label: 'Resume',
+          href: 'https://0nn7a.github.io/resume-by-manus/'
         }
       ]
     },
