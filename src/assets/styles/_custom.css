@@ -36,12 +36,16 @@
 
 
 .mark-highlight {
-  @apply relative text-(--aj-color-text) bg-(--aj-highlight-yellow) mask-contain mask-no-repeat mask-center;
+  @apply relative text-(--aj-color-text) bg-(--aj-highlight-yellow) mask-no-repeat mask-center;
   mask-image: url("@/assets/images/highlight-bg.svg");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 
   &::before {
-    @apply absolute content-[''] inset-0 bg-(--aj-highlight-yellow) mix-blend-multiply scale-x-50 origin-right mask-contain mask-no-repeat mask-center;
+    @apply absolute content-[''] inset-0 bg-(--aj-highlight-yellow) mix-blend-multiply scale-x-50 origin-right mask-no-repeat mask-center;
     mask-image: url("@/assets/images/highlight-pen.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
   }
 }
 html[data-theme='dark'] {

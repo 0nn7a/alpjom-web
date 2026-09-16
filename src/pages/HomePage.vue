@@ -87,7 +87,7 @@ onMounted(async () => {
   @apply leading-8 text-2xl whitespace-normal;
 }
 .text-flow .photo {
-  @apply inline-block mx-1 h-7 w-14 align-text-bottom rounded-md object-cover scale-100 rotate-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)];
+  @apply relative z-10 inline-block mx-1 h-7 w-14 align-text-bottom rounded-md object-cover scale-100 rotate-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)];
 
   &:hover,
   &:active {
