@@ -1,17 +1,13 @@
 import type { WordleDifficulty, WordleMode } from '@/utils/wordle.ts';
 
+// 已完成遊戲紀錄
 export interface WordleRecord {
   id: number;
-  userId: number;
-  wordId: number;
   mode: WordleMode;
   difficulty: WordleDifficulty;
-  maxGuesses: number; // 0 -> 無限
-  isWin: boolean; // 1/0 -> true/false, null -> ing
-  shareToken: string; // 只在遊戲結束後回傳，能順手導向至分享頁
-  createdAt: string;
+  isWin: boolean; // 1/0 -> true/false
+  shareToken: string;
   finishedAt: string;
-  date: string;
 }
 
 // 開始遊戲
@@ -39,9 +35,9 @@ export interface WordleGuessRequest {
 }
 export interface WordleGuessResponse {
   guess: WordleGuess;
-  isWin: boolean; // 1/0 -> true/false, null -> ing
-  answer: string; // 只在遊戲結束後回傳，避免失敗後不知道答案
-  shareToken: string; // 只在遊戲結束後回傳，能順手導向至分享頁
+  isWin: boolean | null; // 1/0 -> true/false, null -> ing
+  answer: string | null; // 只在遊戲結束後回傳，避免失敗後不知道答案
+  shareToken: string | null; // 只在遊戲結束後回傳，能順手導向至分享頁
 }
 
 // 整局遊戲資料
@@ -50,10 +46,10 @@ export interface WordleGameResponse {
   mode: WordleMode;
   difficulty: WordleDifficulty;
   maxGuesses: number;
-  isWin: boolean;
+  isWin: boolean | null; // 1/0 -> true/false, null -> ing
   date: string;
-  answer: string;
-  shareToken: string;
+  answer: string | null; // 只在遊戲結束後回傳，避免失敗後不知道答案
+  shareToken: string | null; // 只在遊戲結束後回傳，能順手導向至分享頁
   guesses: WordleGuess[]; // 該局遊戲所有猜測紀錄，依 createdAt 排序
 }
 
@@ -91,9 +87,9 @@ export interface WordleShareResponse {
 
 // 每日模式開始前檢查
 export interface WordleBeforeDailyResponse {
-  recordId: number;
-  isWin: boolean;
-  shareToken: string;
+  recordId: number | null; // 今日謎題未必已建立
+  isWin: boolean | null; // 1/0 -> true/false, null -> ing
+  shareToken: string | null; // 只在遊戲結束後回傳，能順手導向至分享頁
 }
 
 // 展示進行中遊戲詳細資料

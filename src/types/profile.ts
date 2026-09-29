@@ -18,9 +18,7 @@ export interface Profile {
 // 用戶頭貼記錄
 export interface UserAvatar {
   id: number;
-  userId: number;
   fileUrl: string;
-  createdAt: string;
 }
 
 // 用戶追蹤關係
